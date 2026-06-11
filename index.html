@@ -66,9 +66,7 @@
       gap: 56px;
     }
 
-    .home-brand {
-      text-align: center;
-    }
+    .home-brand { text-align: center; }
 
     .home-acronym {
       font-family: 'Lora', Georgia, serif;
@@ -83,7 +81,6 @@
       margin-top: 12px;
       font-size: 17px;
       color: var(--text-2);
-      font-weight: 400;
     }
 
     .home-author {
@@ -120,23 +117,9 @@
       border-color: var(--primary);
     }
 
-    .home-card-icon {
-      font-size: 38px;
-      margin-bottom: 14px;
-      line-height: 1;
-    }
-
-    .home-card-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-
-    .home-card-desc {
-      font-size: 13px;
-      color: var(--text-2);
-    }
+    .home-card-icon  { font-size: 38px; margin-bottom: 14px; line-height: 1; }
+    .home-card-title { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .home-card-desc  { font-size: 13px; color: var(--text-2); }
 
     /* ============================================================
        PATIENT HEADER
@@ -150,8 +133,24 @@
       box-shadow: 0 1px 6px rgba(37,50,56,.07);
       padding: 14px 32px;
       display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .patient-bar-top {
+      display: flex;
       align-items: center;
       gap: 16px;
+    }
+
+    .patient-bar-sessions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding-top: 10px;
+      margin-top: 10px;
+      border-top: 1px solid var(--border-light);
     }
 
     .btn-back {
@@ -169,15 +168,9 @@
       flex-shrink: 0;
     }
 
-    .btn-back:hover {
-      background: var(--surface-2);
-      color: var(--text);
-    }
+    .btn-back:hover { background: var(--surface-2); color: var(--text); }
 
-    .patient-meta {
-      flex: 1;
-      min-width: 0;
-    }
+    .patient-meta { flex: 1; min-width: 0; }
 
     .patient-fullname {
       font-family: 'Lora', Georgia, serif;
@@ -189,16 +182,40 @@
       text-overflow: ellipsis;
     }
 
-    .patient-code {
+    .patient-code { font-size: 13px; color: var(--text-2); }
+
+    .bar-actions { display: flex; gap: 10px; flex-shrink: 0; }
+
+    /* ===== SESSION CONTROLS ===== */
+    .sess-select {
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235E7880' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 7px 32px 7px 12px;
       font-size: 13px;
-      color: var(--text-2);
-      font-weight: 400;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      outline: none;
+      transition: border-color .2s;
+      max-width: 240px;
     }
 
-    .bar-actions {
-      display: flex;
-      gap: 10px;
-      flex-shrink: 0;
+    .sess-select:focus { border-color: var(--primary); }
+
+    .badge-locked {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-2);
+      padding: 7px 12px;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
     }
 
     /* ===== BUTTONS ===== */
@@ -221,19 +238,10 @@
       border: 1.5px solid var(--border);
     }
 
-    .btn-outline:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-    }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
 
-    .btn-primary {
-      background: var(--primary);
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-dark);
-    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
 
     .btn-cta {
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
@@ -256,10 +264,7 @@
       cursor: not-allowed;
     }
 
-    .btn-sm {
-      padding: 8px 16px;
-      font-size: 13px;
-    }
+    .btn-sm { padding: 7px 14px; font-size: 13px; }
 
     /* ============================================================
        PATIENT CONTENT
@@ -286,11 +291,7 @@
     }
 
     /* ===== ACTIVITY ROWS ===== */
-    .act-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    .act-list { display: flex; flex-direction: column; gap: 10px; }
 
     .act-row {
       background: var(--surface);
@@ -304,14 +305,9 @@
       transition: border-color .2s, box-shadow .2s;
     }
 
-    .act-row:hover {
-      box-shadow: var(--shadow-lg);
-    }
-
-    .act-row.is-selected {
-      border-color: var(--primary);
-      background: var(--primary-light);
-    }
+    .act-row:hover { box-shadow: var(--shadow-lg); }
+    .act-row.is-selected { border-color: var(--primary); background: var(--primary-light); }
+    .act-row.is-locked { opacity: .8; }
 
     .act-check {
       width: 20px;
@@ -343,28 +339,14 @@
       min-width: 0;
     }
 
-    .act-desc-input:focus {
-      background: var(--surface-2);
-    }
-
-    .act-desc-input::placeholder {
-      color: var(--border);
-    }
+    .act-desc-input:focus { background: var(--surface-2); }
+    .act-desc-input[readonly] { cursor: default; }
+    .act-desc-input::placeholder { color: var(--border); }
 
     /* ===== SCORE COLUMNS ===== */
-    .act-score-wrap {
-      flex-shrink: 0;
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-    }
+    .act-score-wrap { flex-shrink: 0; display: flex; align-items: flex-start; gap: 14px; }
 
-    .score-col {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-    }
+    .score-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
 
     .score-col-label {
       font-size: 10px;
@@ -374,11 +356,7 @@
       color: var(--text-2);
     }
 
-    .score-input-row {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
+    .score-input-row { display: flex; align-items: center; gap: 4px; }
 
     .act-score-input {
       width: 64px;
@@ -398,22 +376,18 @@
     .act-score-input::-webkit-inner-spin-button,
     .act-score-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 
-    .act-score-input:focus {
-      border-color: var(--primary);
-    }
+    .act-score-input:focus { border-color: var(--primary); }
+    .act-score-input[readonly] { cursor: default; background: var(--surface-2); }
 
     /* Vissuto states */
     .vissuto-input { border-style: dashed; }
     .vissuto-input::placeholder { color: var(--border); font-size: 18px; font-family: 'Inter', sans-serif; }
-    .vissuto-empty  { border-color: var(--border); color: var(--text-2); }
-    .vissuto-better { border-color: var(--success); border-style: solid; color: var(--success); }
-    .vissuto-worse  { border-color: var(--warn);    border-style: solid; color: var(--warn); }
-    .vissuto-same   { border-color: var(--border);  border-style: solid; color: var(--primary); }
+    .vissuto-empty  { border-color: var(--border);  color: var(--text-2); }
+    .vissuto-better { border-color: var(--success);  border-style: solid; color: var(--success); }
+    .vissuto-worse  { border-color: var(--warn);     border-style: solid; color: var(--warn); }
+    .vissuto-same   { border-color: var(--border);   border-style: solid; color: var(--primary); }
 
-    .score-denom {
-      font-size: 13px;
-      color: var(--text-2);
-    }
+    .score-denom { font-size: 13px; color: var(--text-2); }
 
     .btn-del {
       background: none;
@@ -431,18 +405,11 @@
       line-height: 1;
     }
 
-    .btn-del:hover {
-      background: var(--danger-bg);
-      color: var(--danger);
-    }
+    .btn-del:hover:not(:disabled) { background: var(--danger-bg); color: var(--danger); }
+    .btn-del:disabled { opacity: .35; cursor: not-allowed; }
 
     /* ===== EMPTY STATE ===== */
-    .empty {
-      text-align: center;
-      padding: 70px 20px;
-      color: var(--text-2);
-    }
-
+    .empty { text-align: center; padding: 70px 20px; color: var(--text-2); }
     .empty-icon { font-size: 52px; opacity: .35; margin-bottom: 16px; }
     .empty-text { font-size: 16px; line-height: 1.7; }
 
@@ -474,7 +441,7 @@
     }
 
     .modal-xl {
-      max-width: 660px;
+      max-width: 620px;
       max-height: 88vh;
       overflow-y: auto;
     }
@@ -492,11 +459,7 @@
       margin-bottom: 6px;
     }
 
-    .modal-sub {
-      font-size: 14px;
-      color: var(--text-2);
-      margin-bottom: 28px;
-    }
+    .modal-sub { font-size: 14px; color: var(--text-2); margin-bottom: 28px; }
 
     .field { margin-bottom: 18px; }
 
@@ -548,6 +511,59 @@
       margin-top: 28px;
     }
 
+    /* ===== SESSIONS MODAL ===== */
+    .sess-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+
+    .sess-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--surface-2);
+      border-radius: var(--r-sm);
+      border: 1.5px solid transparent;
+      transition: border-color .15s, background .15s;
+      cursor: pointer;
+    }
+
+    .sess-item:hover { border-color: var(--border); }
+    .sess-item.sess-active { border-color: var(--primary); background: var(--primary-light); cursor: default; }
+
+    .sess-item-info { flex: 1; min-width: 0; }
+    .sess-item-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    .sess-item-date { font-size: 12px; color: var(--text-2); }
+
+    .new-sess-section {
+      border-top: 1px solid var(--border-light);
+      padding-top: 20px;
+      margin-top: 8px;
+    }
+
+    .new-sess-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
     /* ===== VP MODAL ===== */
     .vp-sec-label {
       font-size: 12px;
@@ -558,11 +574,7 @@
       margin-bottom: 12px;
     }
 
-    .vp-divider {
-      border: none;
-      border-top: 1px solid var(--border-light);
-      margin: 26px 0;
-    }
+    .vp-divider { border: none; border-top: 1px solid var(--border-light); margin: 26px 0; }
 
     .vp-act-card {
       background: var(--primary-light);
@@ -572,12 +584,7 @@
       border-left: 3px solid var(--primary);
     }
 
-    .vp-act-top {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
+    .vp-act-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 
     .vp-badge {
       background: var(--primary);
@@ -592,11 +599,7 @@
       flex-shrink: 0;
     }
 
-    .vp-act-name {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-    }
+    .vp-act-name { font-size: 15px; font-weight: 600; color: var(--text); }
 
     .vp-note-label {
       font-size: 11px;
@@ -634,16 +637,16 @@
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* ============================================================
-       RESPONSIVE TWEAKS
+       RESPONSIVE
     ============================================================ */
     @media (max-width: 640px) {
       .patient-bar { padding: 12px 16px; }
       .patient-body { padding: 0 16px 60px; margin-top: 28px; }
-      .bar-actions .btn { display: none; }
-      .bar-actions .btn-cta { display: inline-flex; }
+      .bar-actions .btn-outline { display: none; }
       .act-score-input { width: 52px; font-size: 20px; }
       .score-col-label { display: none; }
       .home-acronym { font-size: 52px; }
+      .sess-select { max-width: 160px; }
     }
   </style>
 </head>
@@ -658,7 +661,6 @@
       <div class="home-tagline">Scala di Disagio Soggettivo &mdash; Gestione schede pazienti</div>
       <div class="home-author">Sviluppata da Joseph Wolpe, anni '50</div>
     </div>
-
     <div class="home-cards">
       <div class="home-card" onclick="openNewPatientModal()">
         <div class="home-card-icon">👤</div>
@@ -679,21 +681,31 @@
 <div id="view-patient" class="view">
 
   <header class="patient-bar">
-    <button class="btn-back" onclick="goHome()">&#8592; Indietro</button>
-    <div class="patient-meta">
-      <div class="patient-fullname" id="pt-name"></div>
-      <div class="patient-code" id="pt-code"></div>
+    <div class="patient-bar-top">
+      <button class="btn-back" onclick="goHome()">&#8592; Indietro</button>
+      <div class="patient-meta">
+        <div class="patient-fullname" id="pt-name"></div>
+        <div class="patient-code" id="pt-code"></div>
+      </div>
+      <div class="bar-actions">
+        <button class="btn btn-outline" onclick="exportJSON()">&#128190; Salva JSON</button>
+        <button class="btn btn-cta" id="btn-vp" onclick="openVPModal()" disabled>&#9654; Voglio provare</button>
+      </div>
     </div>
-    <div class="bar-actions">
-      <button class="btn btn-outline" onclick="exportJSON()">&#128190; Salva JSON</button>
-      <button class="btn btn-cta" id="btn-vp" onclick="openVPModal()" disabled>&#9654; Voglio provare</button>
+
+    <div class="patient-bar-sessions">
+      <select id="sess-select" class="sess-select" onchange="switchSession(this.value)"></select>
+      <button class="btn btn-outline btn-sm" onclick="openSessionsModal()">+ Sessione</button>
+      <button class="btn btn-outline btn-sm" id="btn-lock" onclick="lockSession()">&#128274; Blocca</button>
+      <span class="badge-locked" id="badge-locked" style="display:none">&#128274; Sessione bloccata</span>
+      <button class="btn btn-outline btn-sm" onclick="openNotesModal()">&#128221; Note</button>
     </div>
   </header>
 
   <div class="patient-body">
     <div class="sec-head">
       <span class="sec-label">Attività e punteggi SUDS</span>
-      <button class="btn btn-primary btn-sm" onclick="addActivity()">+ Aggiungi attività</button>
+      <button class="btn btn-primary btn-sm" id="btn-add-act" onclick="addActivity()">+ Aggiungi attività</button>
     </div>
 
     <div class="act-list" id="act-list"></div>
@@ -710,7 +722,6 @@
   <div class="modal">
     <div class="modal-title">Nuovo paziente</div>
     <div class="modal-sub">Inserisci nome e cognome. Il codice identificativo viene generato in automatico.</div>
-
     <div class="field">
       <label class="field-label" for="in-nome">Nome</label>
       <input id="in-nome" class="field-input" type="text" placeholder="es. Mario" autocomplete="off">
@@ -719,10 +730,46 @@
       <label class="field-label" for="in-cognome">Cognome</label>
       <input id="in-cognome" class="field-input" type="text" placeholder="es. Rossi" autocomplete="off">
     </div>
-
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modal-new')">Annulla</button>
       <button class="btn btn-primary" onclick="createPatient()">Crea scheda</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: Sessioni ==================== -->
+<div id="modal-sessions" class="overlay">
+  <div class="modal modal-xl">
+    <div class="modal-title">Sessioni</div>
+    <div class="modal-sub">Seleziona la sessione attiva o creane una nuova.</div>
+
+    <div class="sess-list" id="sess-list"></div>
+
+    <div class="new-sess-section">
+      <div class="new-sess-title">Nuova sessione</div>
+      <label class="checkbox-row">
+        <input type="checkbox" id="new-sess-copy">
+        Copia punteggi stimato dalla sessione precedente
+      </label>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-sessions')">Chiudi</button>
+      <button class="btn btn-primary" onclick="createSession()">Crea sessione</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: Note private ==================== -->
+<div id="modal-notes" class="overlay">
+  <div class="modal">
+    <div class="modal-title">&#128221; Note private</div>
+    <div class="modal-sub">Queste note non appaiono nel PDF.</div>
+    <textarea id="notes-textarea" class="field-textarea" style="min-height:160px"
+              placeholder="Note di sessione..."></textarea>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-notes')">Annulla</button>
+      <button class="btn btn-primary" onclick="saveNotes()">Salva</button>
     </div>
   </div>
 </div>
@@ -759,7 +806,7 @@
 /* ================================================================
    STATE
 ================================================================ */
-let patient = null;         // v2 schema
+let patient = null;
 let currentSessionId = null;
 
 /* ================================================================
@@ -780,6 +827,11 @@ function esc(s) {
 
 function today() {
   return new Date().toISOString().slice(0, 10);
+}
+
+function formatDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function toast(msg, type = 'ok') {
@@ -872,8 +924,142 @@ function createPatient() {
 function renderPatient() {
   document.getElementById('pt-name').textContent = `${patient.nome} ${patient.cognome}`;
   document.getElementById('pt-code').textContent = `Codice: #${patient.id}`;
+  renderSessionSelector();
   renderActivities();
   syncVPBtn();
+}
+
+/* ================================================================
+   SESSION MANAGEMENT
+================================================================ */
+function renderSessionSelector() {
+  const select = document.getElementById('sess-select');
+  select.innerHTML = patient.sessioni.slice().reverse().map((s, i) => {
+    const n    = patient.sessioni.length - i;
+    const lock = s.locked ? ' 🔒' : '';
+    return `<option value="${s.id}" ${s.id === currentSessionId ? 'selected' : ''}>Sessione ${n} — ${formatDate(s.data)}${lock}</option>`;
+  }).join('');
+
+  const sess      = activeSession();
+  const btnLock   = document.getElementById('btn-lock');
+  const badgeLock = document.getElementById('badge-locked');
+  const btnAdd    = document.getElementById('btn-add-act');
+
+  if (sess?.locked) {
+    btnLock.style.display   = 'none';
+    badgeLock.style.display = '';
+    btnAdd.disabled         = true;
+    btnAdd.style.opacity    = '.4';
+    btnAdd.style.cursor     = 'not-allowed';
+  } else {
+    btnLock.style.display   = '';
+    badgeLock.style.display = 'none';
+    btnAdd.disabled         = false;
+    btnAdd.style.opacity    = '';
+    btnAdd.style.cursor     = '';
+  }
+}
+
+function switchSession(id) {
+  currentSessionId = id;
+  renderSessionSelector();
+  renderActivities();
+  syncVPBtn();
+}
+
+function openSessionsModal() {
+  renderSessionList();
+  document.getElementById('new-sess-copy').checked = false;
+  openModal('modal-sessions');
+}
+
+function renderSessionList() {
+  const list = document.getElementById('sess-list');
+  list.innerHTML = patient.sessioni.slice().reverse().map((s, i) => {
+    const n         = patient.sessioni.length - i;
+    const isActive  = s.id === currentSessionId;
+    const canDelete = !s.locked && patient.sessioni.length > 1;
+    return `
+    <div class="sess-item${isActive ? ' sess-active' : ''}"
+         onclick="${isActive ? '' : `switchSessionModal('${s.id}')`}">
+      <div class="sess-item-info">
+        <div class="sess-item-name">Sessione ${n}${s.locked ? ' 🔒' : ''}</div>
+        <div class="sess-item-date">${formatDate(s.data)}</div>
+      </div>
+      ${canDelete
+        ? `<button class="btn-del" onclick="deleteSession(event,'${s.id}')" title="Elimina">&#215;</button>`
+        : ''}
+    </div>`;
+  }).join('');
+}
+
+function switchSessionModal(id) {
+  switchSession(id);
+  renderSessionList();
+}
+
+function deleteSession(event, id) {
+  event.stopPropagation();
+  if (!confirm('Eliminare questa sessione? L\'operazione non può essere annullata.')) return;
+  patient.sessioni = patient.sessioni.filter(s => s.id !== id);
+  if (currentSessionId === id) {
+    currentSessionId = patient.sessioni[patient.sessioni.length - 1].id;
+  }
+  renderSessionList();
+  renderSessionSelector();
+  renderActivities();
+  syncVPBtn();
+  autoSave();
+}
+
+function createSession() {
+  const copyPrev = document.getElementById('new-sess-copy').checked;
+  const prevSess = activeSession();
+  const sessId   = 'sess_' + uidAct();
+
+  const punteggi = patient.attivita.map(a => {
+    const prev = copyPrev && prevSess
+      ? prevSess.punteggi.find(p => p.attivita_id === a.id)
+      : null;
+    return { attivita_id: a.id, stimato: prev ? prev.stimato : 0, vissuto: null, sel: false };
+  });
+
+  patient.sessioni.push({ id: sessId, data: today(), locked: false, notePrivate: '', punteggi });
+  currentSessionId = sessId;
+
+  closeModal('modal-sessions');
+  renderSessionSelector();
+  renderActivities();
+  syncVPBtn();
+  autoSave();
+  toast('Nuova sessione creata.');
+}
+
+function lockSession() {
+  const sess = activeSession();
+  if (!sess) return;
+  if (!confirm('Una sessione bloccata non può essere modificata. Continuare?')) return;
+  sess.locked = true;
+  renderSessionSelector();
+  renderActivities();
+  autoSave();
+  toast('Sessione bloccata.');
+}
+
+function openNotesModal() {
+  const sess = activeSession();
+  if (!sess) return;
+  document.getElementById('notes-textarea').value = sess.notePrivate || '';
+  openModal('modal-notes');
+}
+
+function saveNotes() {
+  const sess = activeSession();
+  if (!sess) return;
+  sess.notePrivate = document.getElementById('notes-textarea').value;
+  autoSave();
+  closeModal('modal-notes');
+  toast('Note salvate.');
 }
 
 /* ================================================================
@@ -891,8 +1077,8 @@ function sorted() {
 
 function vissutoClass(vissuto, stimato) {
   if (vissuto === null || vissuto === undefined) return 'vissuto-empty';
-  if (vissuto < stimato) return 'vissuto-better';
-  if (vissuto > stimato) return 'vissuto-worse';
+  if (vissuto < stimato)  return 'vissuto-better';
+  if (vissuto > stimato)  return 'vissuto-worse';
   return 'vissuto-same';
 }
 
@@ -901,38 +1087,41 @@ function renderActivities() {
   const empty = document.getElementById('act-empty');
   const items = sorted();
   const sess  = activeSession();
+  const locked = sess?.locked ?? false;
 
   if (!items.length) {
-    list.style.display = 'none';
+    list.style.display  = 'none';
     empty.style.display = '';
     return;
   }
 
-  list.style.display = 'flex';
+  list.style.display  = 'flex';
   empty.style.display = 'none';
 
   list.innerHTML = items.map((a, i) => {
-    const p        = sess?.punteggi.find(p => p.attivita_id === a.id);
-    const stimato  = p?.stimato ?? 0;
-    const vissuto  = p?.vissuto ?? null;
-    const sel      = p?.sel ?? false;
-    const vc       = vissutoClass(vissuto, stimato);
-    const vissVal  = vissuto !== null ? vissuto : '';
+    const p       = sess?.punteggi.find(p => p.attivita_id === a.id);
+    const stimato = p?.stimato ?? 0;
+    const vissuto = p?.vissuto ?? null;
+    const sel     = p?.sel ?? false;
+    const vc      = vissutoClass(vissuto, stimato);
+    const vissVal = vissuto !== null ? vissuto : '';
+    const ro      = locked ? 'readonly' : '';
+    const dis     = locked ? 'disabled' : '';
 
     return `
-    <div class="act-row${sel ? ' is-selected' : ''}" data-id="${a.id}">
-      <input type="checkbox" class="act-check" ${sel ? 'checked' : ''}
+    <div class="act-row${sel ? ' is-selected' : ''}${locked ? ' is-locked' : ''}" data-id="${a.id}">
+      <input type="checkbox" class="act-check" ${sel ? 'checked' : ''} ${dis}
              onchange="toggleSel('${a.id}', this.checked)">
       <span class="act-rank">${i + 1}</span>
       <input type="text" class="act-desc-input" value="${esc(a.desc)}"
-             placeholder="Descrivi l'attività..."
+             placeholder="Descrivi l'attività..." ${ro}
              oninput="updateDesc('${a.id}', this.value)">
       <div class="act-score-wrap">
         <div class="score-col">
           <span class="score-col-label">Stimato</span>
           <div class="score-input-row">
             <input type="number" class="act-score-input" value="${stimato}"
-                   min="0" max="100"
+                   min="0" max="100" ${ro}
                    oninput="updateStimato('${a.id}', this.value)"
                    onblur="sortOnBlur()">
             <span class="score-denom">/100</span>
@@ -942,18 +1131,19 @@ function renderActivities() {
           <span class="score-col-label">Vissuto</span>
           <div class="score-input-row">
             <input type="number" class="act-score-input vissuto-input ${vc}"
-                   value="${vissVal}" min="0" max="100" placeholder="—"
+                   value="${vissVal}" min="0" max="100" placeholder="—" ${ro}
                    oninput="updateVissuto('${a.id}', this.value)">
             <span class="score-denom">/100</span>
           </div>
         </div>
       </div>
-      <button class="btn-del" onclick="deleteActivity('${a.id}')" title="Elimina">&#215;</button>
+      <button class="btn-del" onclick="deleteActivity('${a.id}')" title="Elimina" ${dis}>&#215;</button>
     </div>`;
   }).join('');
 }
 
 function addActivity() {
+  if (activeSession()?.locked) return;
   const actId = uidAct();
   patient.attivita.push({ id: actId, desc: '' });
   patient.sessioni.forEach(sess => {
@@ -967,6 +1157,7 @@ function addActivity() {
 }
 
 function deleteActivity(id) {
+  if (activeSession()?.locked) return;
   patient.attivita = patient.attivita.filter(a => a.id !== id);
   patient.sessioni.forEach(sess => {
     sess.punteggi = sess.punteggi.filter(p => p.attivita_id !== id);
@@ -977,18 +1168,19 @@ function deleteActivity(id) {
 }
 
 function updateDesc(id, val) {
+  if (activeSession()?.locked) return;
   const a = patient.attivita.find(a => a.id === id);
   if (a) a.desc = val;
   autoSave();
 }
 
 function updateStimato(id, val) {
+  if (activeSession()?.locked) return;
   const p = punteggio(id);
   if (!p) return;
   let v = parseInt(val);
   if (isNaN(v)) v = 0;
   p.stimato = Math.max(0, Math.min(100, v));
-  // refresh vissuto color live without full re-render
   const row = document.querySelector(`.act-row[data-id="${id}"]`);
   if (row) {
     const vi = row.querySelector('.vissuto-input');
@@ -998,6 +1190,7 @@ function updateStimato(id, val) {
 }
 
 function updateVissuto(id, val) {
+  if (activeSession()?.locked) return;
   const p = punteggio(id);
   if (!p) return;
   p.vissuto = (val === '' || val === null) ? null : Math.max(0, Math.min(100, parseInt(val) || 0));
@@ -1019,6 +1212,7 @@ function sortOnBlur() {
 }
 
 function toggleSel(id, checked) {
+  if (activeSession()?.locked) return;
   const p = punteggio(id);
   if (p) p.sel = checked;
   const row = document.querySelector(`.act-row[data-id="${id}"]`);
@@ -1088,10 +1282,7 @@ function onFileImport(e) {
   r.onload = ev => {
     try {
       let data = JSON.parse(ev.target.result);
-      if (!data.id || !data.nome || !data.cognome) {
-        toast('File non valido.', 'err');
-        return;
-      }
+      if (!data.id || !data.nome || !data.cognome) { toast('File non valido.', 'err'); return; }
       const wasV1 = !data.v || data.v < 2;
       if (wasV1) data = migrateV1toV2(data);
       patient = data;
@@ -1113,10 +1304,7 @@ function onFileImport(e) {
 function openVPModal() {
   const sess = activeSession();
   if (!sess) return;
-  const selActs = sorted().filter(a => {
-    const p = sess.punteggi.find(p => p.attivita_id === a.id);
-    return p?.sel;
-  });
+  const selActs = sorted().filter(a => sess.punteggi.find(p => p.attivita_id === a.id)?.sel);
   if (!selActs.length) { toast('Seleziona almeno un\'attività.', 'err'); return; }
 
   document.getElementById('vp-general').value = '';
@@ -1145,11 +1333,8 @@ function generatePDF() {
   const { jsPDF } = window.jspdf;
   if (!jsPDF) { toast('jsPDF non caricato. Connetti Internet e riprova.', 'err'); return; }
 
-  const sess = activeSession();
-  const selActs = sorted().filter(a => {
-    const p = sess?.punteggi.find(p => p.attivita_id === a.id);
-    return p?.sel;
-  });
+  const sess    = activeSession();
+  const selActs = sorted().filter(a => sess?.punteggi.find(p => p.attivita_id === a.id)?.sel);
 
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const PW  = doc.internal.pageSize.getWidth();
@@ -1173,8 +1358,8 @@ function generatePDF() {
   const NFS = 12, NLH = 8;
   const NGAP = 10, NLFS = 8.5, NLABEL_H = 7;
   const NoteFS = 10.5, NoteLH = 7;
-  const NoteX = ML + CPL + 4;
-  const NoteW = CW - CPL - 4 - 4;
+  const NoteX  = ML + CPL + 4;
+  const NoteW  = CW - CPL - 4 - 4;
   const CG  = 8;
 
   function lines(arr, x, startY, lh) {
@@ -1187,7 +1372,6 @@ function generatePDF() {
     if (y + needed > PH - 20) addPage();
   }
 
-  // Header band
   doc.setFillColor(...C_PRIMARY);
   doc.rect(0, 0, PW, 40, 'F');
   doc.setTextColor(...C_WHITE);
@@ -1200,7 +1384,6 @@ function generatePDF() {
   doc.text(`${patient.nome} ${patient.cognome}  ·  #${patient.id}  ·  ${dateStr}`, ML, 32);
   y = 52;
 
-  // General comment
   const genComment = document.getElementById('vp-general').value.trim();
   if (genComment) {
     doc.setFont('helvetica', 'normal');
@@ -1208,7 +1391,6 @@ function generatePDF() {
     const genLines = doc.splitTextToSize(genComment, CW - 16);
     const genBoxH  = 8 + 4 + genLines.length * 7 + 10;
     checkY(genBoxH + 16);
-
     doc.setFillColor(...C_LIGHT);
     doc.roundedRect(ML, y, CW, genBoxH, 3, 3, 'F');
     doc.setFont('helvetica', 'bold');
@@ -1220,14 +1402,12 @@ function generatePDF() {
     doc.setTextColor(...C_TEXT);
     lines(genLines, ML + 8, y + 8 + 4 + 7, 7);
     y += genBoxH + 14;
-
     doc.setDrawColor(...C_LIGHT);
     doc.setLineWidth(0.4);
     doc.line(ML, y, PW - MR, y);
     y += 12;
   }
 
-  // Section label
   checkY(18);
   doc.setTextColor(...C_TEXT2);
   doc.setFont('helvetica', 'bold');
@@ -1235,22 +1415,20 @@ function generatePDF() {
   doc.text('ATTIVITÀ SELEZIONATE — ORDINATE PER PUNTEGGIO CRESCENTE', ML, y);
   y += 12;
 
-  // Note map from modal
   const noteMap = {};
   document.querySelectorAll('#vp-acts textarea[data-id]').forEach(ta => {
     noteMap[ta.dataset.id] = ta.value.trim();
   });
 
-  // Activity cards
   selActs.forEach(act => {
-    const p = sess?.punteggi.find(p => p.attivita_id === act.id);
+    const p       = sess?.punteggi.find(p => p.attivita_id === act.id);
     const stimato = p?.stimato ?? 0;
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(NFS);
     const nameLines = doc.splitTextToSize(act.desc || '(attività senza nome)', NW);
 
-    const note = noteMap[act.id] || '';
+    const note      = noteMap[act.id] || '';
     doc.setFont('helvetica', 'italic');
     doc.setFontSize(NoteFS);
     const noteLines = note ? doc.splitTextToSize(note, NoteW) : [];
@@ -1295,7 +1473,6 @@ function generatePDF() {
     y += cardH + CG;
   });
 
-  // Page footer
   const totalPages = doc.internal.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
@@ -1319,7 +1496,7 @@ function generatePDF() {
 ================================================================ */
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    ['modal-new', 'modal-vp'].forEach(id => closeModal(id));
+    ['modal-new', 'modal-sessions', 'modal-notes', 'modal-vp'].forEach(id => closeModal(id));
   }
 });
 
