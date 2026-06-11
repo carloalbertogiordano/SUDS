@@ -446,6 +446,18 @@
       max-width: 620px;
       max-height: 88vh;
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-xl > .modal-footer {
+      position: sticky;
+      bottom: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border-light);
+      padding-top: 14px;
+      margin-top: 8px;
+      flex-shrink: 0;
     }
 
     @keyframes pop-in {
@@ -1803,7 +1815,7 @@ async function generatePDF() {
     y += cardH + CG;
   });
 
-  // QR code — bottom-right of last page
+  // QR code — below last card, right-aligned
   try {
     if (window.QRCode) {
       const payload    = buildQRPayload(selActs, sess);
@@ -1812,15 +1824,15 @@ async function generatePDF() {
       const qrUrl      = `https://carloalbertogiordano.github.io/SUDS/#view=voglio-provare&data=${encodeURIComponent(encoded)}`;
       if (qrUrl.length <= 1800) {
         const qrDataUrl = await QRCode.toDataURL(qrUrl, { width: 200, margin: 1, color: { dark: '#3D6E7E', light: '#FFFFFF' } });
-        const lastPage  = doc.internal.getNumberOfPages();
-        doc.setPage(lastPage);
+        const QR_H = 28; // QR image + caption height (mm)
+        checkY(QR_H + 4);
         const qrX = PW - MR - 26;
-        const qrY = PH - 38;
-        doc.addImage(qrDataUrl, 'PNG', qrX, qrY, 24, 24);
+        doc.addImage(qrDataUrl, 'PNG', qrX, y, 24, 24);
         doc.setFontSize(6.5);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(...C_TEXT2);
-        doc.text('Scansiona per rileggere', qrX + 12, qrY + 25.5, { align: 'center' });
+        doc.text('Scansiona per rileggere', qrX + 12, y + 25.5, { align: 'center' });
+        y += QR_H;
       }
     }
   } catch(e) { /* QR non bloccante */ }
