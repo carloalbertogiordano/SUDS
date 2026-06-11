@@ -840,6 +840,116 @@
     }
 
     /* ============================================================
+       VOGLIO PROVARE FULLSCREEN VIEW
+    ============================================================ */
+    #view-vp {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    #view-vp.open { display: flex; }
+
+    .vp-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-light);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+    }
+
+    .vp-header-title {
+      flex: 1;
+      font-family: 'Lora', Georgia, serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .vp-body {
+      flex: 1;
+      padding: 32px 48px 120px;
+      max-width: 760px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .vp-result-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 2px solid var(--primary);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: flex-end;
+      box-shadow: 0 -4px 16px rgba(37,50,56,.1);
+      z-index: 50;
+    }
+
+    .vp-result-status {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    /* Presenta row toggles */
+    .presenta-toggle-btn {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      line-height: 1;
+      color: var(--text-2);
+      transition: all .15s;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .presenta-toggle-btn:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-bg); }
+
+    .presenta-row.hidden { display: none; }
+
+    .btn-presenta-reset {
+      display: none;
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+
+    .btn-presenta-reset.visible { display: inline-flex; }
+    .btn-presenta-reset:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* ============================================================
        RESPONSIVE
     ============================================================ */
     @media (max-width: 640px) {
@@ -892,7 +1002,7 @@
       </div>
       <div class="bar-actions">
         <button class="btn btn-outline" onclick="exportJSON()" data-tooltip="Esporta scheda come file JSON">&#128190; Salva JSON</button>
-        <button class="btn btn-cta" id="btn-vp" onclick="openVPModal()" disabled data-tooltip="Genera PDF con le attività selezionate">&#9654; Voglio provare</button>
+        <button class="btn btn-cta" id="btn-vp" onclick="openVPView()" disabled data-tooltip="Genera PDF con le attività selezionate">&#9654; Voglio provare</button>
       </div>
     </div>
 
@@ -980,28 +1090,29 @@
   </div>
 </div>
 
-<!-- ==================== MODAL: Voglio provare ==================== -->
-<div id="modal-vp" class="overlay">
-  <div class="modal modal-xl">
-    <div class="modal-title">&#9654; Voglio Provare</div>
-    <div class="modal-sub">Aggiungi note e genera il PDF da consegnare al paziente.</div>
-
-    <div class="vp-sec-label">Commento generale</div>
-    <textarea id="vp-general" class="field-textarea"
-      placeholder="Note introduttive, indicazioni generali per questa sessione..."></textarea>
-
+<!-- ==================== VIEW: Voglio Provare ==================== -->
+<div id="view-vp">
+  <div class="vp-header">
+    <button class="btn-back" onclick="closeVPView()">&#8592; Indietro</button>
+    <div class="vp-header-title">&#9654; Voglio Provare &mdash; <span id="vp-patient-name"></span></div>
+    <button class="btn btn-cta" id="vp-genera-btn" onclick="preparePDF()">Genera PDF</button>
+  </div>
+  <div class="vp-body">
+    <div class="field">
+      <label class="field-label">Commento generale</label>
+      <textarea id="vp-general" class="field-textarea" style="min-height:100px"
+        placeholder="Note introduttive, indicazioni generali per questa sessione..."></textarea>
+    </div>
     <hr class="vp-divider">
-
     <div class="vp-sec-label">Attività selezionate &mdash; ordinate per punteggio crescente</div>
     <div id="vp-acts"></div>
-
-    <div class="modal-footer">
-      <button class="btn btn-outline" id="vp-annulla-btn" onclick="closeVPModal()">Annulla</button>
-      <button class="btn btn-primary" id="vp-genera-btn" onclick="preparePDF()">Genera PDF</button>
-      <button class="btn btn-outline" id="vp-chiudi-btn" style="display:none" onclick="closeVPModal()">Chiudi</button>
-      <button class="btn btn-outline" id="vp-share-btn" style="display:none" onclick="sharePDF()" data-tooltip="Condividi via AirDrop, WhatsApp, Mail…">&#128257; Condividi</button>
-      <button class="btn btn-primary" id="vp-download-btn" style="display:none" onclick="downloadPDF()" data-tooltip="Scarica il PDF sul dispositivo">&#8681; Scarica PDF</button>
-    </div>
+  </div>
+  <div id="vp-result-bar" class="vp-result-bar" style="display:none">
+    <span class="vp-result-status">&#10003; PDF pronto</span>
+    <button class="btn btn-outline" id="vp-share-btn" onclick="sharePDF()" style="display:none"
+            data-tooltip="Condividi via AirDrop, WhatsApp, Mail…">&#128257; Condividi</button>
+    <button class="btn btn-primary" id="vp-download-btn" onclick="downloadPDF()"
+            data-tooltip="Scarica il PDF sul dispositivo">&#8681; Scarica PDF</button>
   </div>
 </div>
 
@@ -1024,6 +1135,7 @@
 <div id="view-presenta">
   <div class="presenta-header">
     <span class="presenta-patient" id="presenta-patient"></span>
+    <button class="btn-presenta-reset" id="presenta-reset" onclick="resetPresentaToggle()"></button>
     <button class="btn-presenta-close" onclick="closePresentazione()">&#215; Chiudi</button>
   </div>
   <div class="presenta-body" id="presenta-body"></div>
@@ -1568,15 +1680,24 @@ function onFileImport(e) {
 }
 
 /* ================================================================
-   VP MODAL
+   VP VIEW (full-page)
 ================================================================ */
-function openVPModal() {
+let _pdfResult = null;
+
+function openVPView() {
   const sess = activeSession();
   if (!sess) return;
   const selActs = sorted().filter(a => sess.punteggi.find(p => p.attivita_id === a.id)?.sel);
   if (!selActs.length) { toast('Seleziona almeno un\'attività.', 'err'); return; }
 
+  document.getElementById('vp-patient-name').textContent = `${patient.nome} ${patient.cognome}`;
   document.getElementById('vp-general').value = '';
+  const genBtn = document.getElementById('vp-genera-btn');
+  genBtn.disabled    = false;
+  genBtn.textContent = 'Genera PDF';
+  document.getElementById('vp-result-bar').style.display = 'none';
+  _pdfResult = null;
+
   document.getElementById('vp-acts').innerHTML = selActs.map(a => {
     const p = sess.punteggi.find(p => p.attivita_id === a.id);
     return `
@@ -1588,46 +1709,37 @@ function openVPModal() {
       <label class="vp-note-label">Nota per questa attività</label>
       <textarea class="field-textarea" data-id="${a.id}"
                 placeholder="Inserisci una nota specifica..."
-                style="min-height:64px"></textarea>
+                style="min-height:80px"></textarea>
     </div>`;
   }).join('');
 
-  openModal('modal-vp');
+  document.getElementById('view-vp').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
-/* ================================================================
-   VP MODAL FLOW (prepare → download / share)
-================================================================ */
-let _pdfResult = null;
-
-function closeVPModal() {
-  closeModal('modal-vp');
+function closeVPView() {
+  document.getElementById('view-vp').classList.remove('open');
+  document.body.style.overflow = '';
   _pdfResult = null;
-  document.getElementById('vp-annulla-btn').style.display = '';
-  document.getElementById('vp-genera-btn').style.display  = '';
-  document.getElementById('vp-chiudi-btn').style.display  = 'none';
-  document.getElementById('vp-share-btn').style.display   = 'none';
-  document.getElementById('vp-download-btn').style.display = 'none';
 }
 
 async function preparePDF() {
   const btn = document.getElementById('vp-genera-btn');
-  btn.disabled = true;
+  btn.disabled    = true;
   btn.textContent = 'Generazione…';
   try {
     _pdfResult = await generatePDF();
-    if (!_pdfResult) return;
-    document.getElementById('vp-annulla-btn').style.display = 'none';
-    document.getElementById('vp-genera-btn').style.display  = 'none';
-    document.getElementById('vp-chiudi-btn').style.display  = '';
-    document.getElementById('vp-download-btn').style.display = '';
+    if (!_pdfResult) { btn.disabled = false; btn.textContent = 'Genera PDF'; return; }
+    btn.innerHTML = '&#8635; Rigenera';
+    btn.disabled    = false;
+    const bar = document.getElementById('vp-result-bar');
+    bar.style.display = '';
     const canShare = typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
     document.getElementById('vp-share-btn').style.display = canShare ? '' : 'none';
     toast('PDF pronto.');
   } catch(e) {
     toast('Errore nella generazione del PDF.', 'err');
-  } finally {
-    btn.disabled = false;
+    btn.disabled    = false;
     btn.textContent = 'Genera PDF';
   }
 }
@@ -1859,8 +1971,9 @@ async function generatePDF() {
 ================================================================ */
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    ['modal-new', 'modal-sessions', 'modal-notes', 'modal-vp', 'modal-progressi'].forEach(id => closeModal(id));
+    ['modal-new', 'modal-sessions', 'modal-notes', 'modal-progressi'].forEach(id => closeModal(id));
     closePresentazione();
+    closeVPView();
     if (document.getElementById('view-qr-read').classList.contains('active')) showView('view-home');
   }
   if (e.key === 'f' || e.key === 'F') {
@@ -1883,7 +1996,6 @@ document.querySelectorAll('.overlay').forEach(ov => {
   ov.addEventListener('click', e => {
     if (e.target === ov) {
       if (ov.id === 'modal-progressi') { closeProgressiModal(); return; }
-      if (ov.id === 'modal-vp') { closeVPModal(); return; }
       ov.classList.remove('open');
     }
   });
@@ -2018,7 +2130,10 @@ function renderChart() {
 /* ================================================================
    PRESENTAZIONE FULLSCREEN
 ================================================================ */
+let presentaHidden = new Set();
+
 function openPresentazione() {
+  presentaHidden = new Set();
   renderPresentazione();
   document.getElementById('view-presenta').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2027,6 +2142,33 @@ function openPresentazione() {
 function closePresentazione() {
   document.getElementById('view-presenta').classList.remove('open');
   document.body.style.overflow = '';
+}
+
+function togglePresentaRow(id) {
+  const row = document.querySelector(`.presenta-row[data-act-id="${id}"]`);
+  if (!row) return;
+  if (presentaHidden.has(id)) {
+    presentaHidden.delete(id);
+    row.classList.remove('hidden');
+  } else {
+    presentaHidden.add(id);
+    row.classList.add('hidden');
+  }
+  updatePresentaHeader();
+}
+
+function resetPresentaToggle() {
+  presentaHidden.clear();
+  document.querySelectorAll('#presenta-body .presenta-row').forEach(r => r.classList.remove('hidden'));
+  updatePresentaHeader();
+}
+
+function updatePresentaHeader() {
+  const n   = presentaHidden.size;
+  const btn = document.getElementById('presenta-reset');
+  if (!btn) return;
+  btn.textContent = n > 0 ? `Mostra tutti (${n} nascost${n === 1 ? 'a' : 'e'})` : '';
+  btn.classList.toggle('visible', n > 0);
 }
 
 /* ================================================================
@@ -2111,7 +2253,7 @@ function renderPresentazione() {
     }
 
     return `
-    <div class="presenta-row">
+    <div class="presenta-row" data-act-id="${a.id}">
       <span class="presenta-rank">${i + 1}</span>
       <span class="presenta-desc">${esc(a.desc) || '(senza nome)'}</span>
       <div class="presenta-scores">
@@ -2121,6 +2263,7 @@ function renderPresentazione() {
         </div>
         ${vissutoHtml}
       </div>
+      <button class="presenta-toggle-btn" onclick="togglePresentaRow('${a.id}')" title="Nascondi riga">&#8854;</button>
     </div>`;
   }).join('');
 }
