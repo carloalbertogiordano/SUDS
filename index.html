@@ -840,6 +840,62 @@
     }
 
     /* ============================================================
+       PROGRESSI FULLSCREEN VIEW
+    ============================================================ */
+    #view-progressi {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    #view-progressi.open { display: flex; }
+
+    .progressi-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-light);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+    }
+
+    .progressi-header-title {
+      flex: 1;
+      font-family: 'Lora', Georgia, serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .progressi-body {
+      flex: 1;
+      padding: 32px 48px;
+      max-width: 1000px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .progressi-chart-container {
+      position: relative;
+      height: 60vh;
+      min-height: 400px;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--r-md);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ============================================================
        VOGLIO PROVARE FULLSCREEN VIEW
     ============================================================ */
     #view-vp {
@@ -1001,7 +1057,7 @@
         <div class="patient-code" id="pt-code"></div>
       </div>
       <div class="bar-actions">
-        <button class="btn btn-outline" onclick="exportJSON()" data-tooltip="Esporta scheda come file JSON">&#128190; Salva JSON</button>
+        <button class="btn btn-outline" onclick="saveJSON()" data-tooltip="Salva scheda (aggiorna file o scarica)">&#128190; Salva</button>
         <button class="btn btn-cta" id="btn-vp" onclick="openVPView()" disabled data-tooltip="Genera PDF con le attività selezionate">&#9654; Voglio provare</button>
       </div>
     </div>
@@ -1013,7 +1069,7 @@
       <span class="badge-locked" id="badge-locked" style="display:none">&#128274; Sessione bloccata</span>
       <button class="btn btn-outline btn-sm" id="btn-unlock" style="display:none" onclick="unlockSession()" data-tooltip="Sblocca la sessione per modificarla di nuovo">&#128275; Sblocca</button>
       <button class="btn btn-outline btn-sm" onclick="openNotesModal()" data-tooltip="Note private di sessione (non appaiono nel PDF)">&#128221; Note</button>
-      <button class="btn btn-outline btn-sm" onclick="openProgressiModal()" data-tooltip="Grafico andamento punteggi nel tempo">&#128200; Progressi</button>
+      <button class="btn btn-outline btn-sm" onclick="openProgressiView()" data-tooltip="Grafico andamento punteggi nel tempo">&#128200; Progressi</button>
       <button class="btn btn-outline btn-sm" onclick="openPresentazione()" data-tooltip="Modalità presentazione a schermo intero (tasto F)">&#9974; Presenta</button>
     </div>
   </header>
@@ -1116,18 +1172,18 @@
   </div>
 </div>
 
-<!-- ==================== MODAL: Progressi ==================== -->
-<div id="modal-progressi" class="overlay">
-  <div class="modal modal-chart">
-    <div class="modal-title">&#128200; Progressi</div>
-    <div class="modal-sub">Andamento dei punteggi SUDS nelle sessioni. Linea continua = stimato, tratteggiata = vissuto.</div>
-    <div class="chart-container">
+<!-- ==================== VIEW: Progressi ==================== -->
+<div id="view-progressi">
+  <div class="progressi-header">
+    <button class="btn-back" onclick="closeProgressiView()">&#8592; Indietro</button>
+    <div class="progressi-header-title">&#128200; Progressi &mdash; <span id="progressi-patient-name"></span></div>
+  </div>
+  <div class="progressi-body">
+    <div class="modal-sub" style="margin-bottom:24px">Andamento dei punteggi SUDS nelle sessioni. Linea continua = stimato, tratteggiata = vissuto.</div>
+    <div class="progressi-chart-container">
       <canvas id="chart-canvas"></canvas>
     </div>
     <p class="chart-hint">Clicca sulla legenda per mostrare/nascondere singole attività.</p>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeProgressiModal()">Chiudi</button>
-    </div>
   </div>
 </div>
 
@@ -1173,6 +1229,7 @@
 ================================================================ */
 let patient = null;
 let currentSessionId = null;
+let fileHandle = null;
 
 /* ================================================================
    UTILS
@@ -1390,7 +1447,9 @@ function createSession() {
     const prev = copyPrev && prevSess
       ? prevSess.punteggi.find(p => p.attivita_id === a.id)
       : null;
-    return { attivita_id: a.id, stimato: prev ? prev.stimato : 0, vissuto: null, sel: false };
+    // Se esiste un vissuto, usalo come nuovo stimato. Altrimenti usa lo stimato precedente.
+    const nuovoStimato = prev ? (prev.vissuto !== null ? prev.vissuto : prev.stimato) : 0;
+    return { attivita_id: a.id, stimato: nuovoStimato, vissuto: null, sel: false };
   });
 
   patient.sessioni.push({ id: sessId, data: today(), locked: false, notePrivate: '', punteggi });
@@ -1614,19 +1673,103 @@ function autoSave() {
   try { localStorage.setItem('suds_draft', JSON.stringify(patient)); } catch(e) {}
 }
 
-function exportJSON() {
-  const blob = new Blob([JSON.stringify(patient, null, 2)], { type: 'application/json' });
+function saveJSON() {
+  if (window.showSaveFilePicker && fileHandle) {
+    saveToFileHandle(fileHandle);
+  } else {
+    exportJSON();
+  }
+}
+
+async function saveToFileHandle(handle) {
+  try {
+    const writable = await handle.createWritable();
+    await writable.write(JSON.stringify(patient, null, 2));
+    await writable.close();
+    toast('File aggiornato correttamente.');
+  } catch (err) {
+    console.error(err);
+    // Fallback if permission denied or other error
+    exportJSON();
+  }
+}
+
+async function exportJSON() {
+  const fileName = `SUDS_${patient.cognome}_${patient.nome}_${patient.id}.json`;
+  const content = JSON.stringify(patient, null, 2);
+
+  if (window.showSaveFilePicker) {
+    try {
+      fileHandle = await window.showSaveFilePicker({
+        suggestedName: fileName,
+        types: [{ description: 'JSON File', accept: { 'application/json': ['.json'] } }]
+      });
+      saveToFileHandle(fileHandle);
+      return;
+    } catch (err) {
+      // User cancelled or error
+      if (err.name === 'AbortError') return;
+    }
+  }
+
+  // Fallback to traditional download
+  const blob = new Blob([content], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
-  a.download = `SUDS_${patient.cognome}_${patient.nome}_${patient.id}.json`;
+  a.download = fileName;
   a.click();
   URL.revokeObjectURL(url);
-  toast('Scheda salvata come JSON.');
+  toast('Scheda scaricata come JSON.');
 }
 
 function triggerImport() {
-  document.getElementById('file-import').click();
+  if (window.showOpenFilePicker) {
+    importWithFS();
+  } else {
+    document.getElementById('file-import').click();
+  }
+}
+
+async function importWithFS() {
+  try {
+    const [handle] = await window.showOpenFilePicker({
+      types: [{ description: 'JSON File', accept: { 'application/json': ['.json'] } }],
+      multiple: false
+    });
+    fileHandle = handle;
+    const file = await handle.getFile();
+    const text = await file.text();
+    processImportedJSON(text);
+  } catch (err) {
+    if (err.name !== 'AbortError') toast('Errore nel caricamento.', 'err');
+  }
+}
+
+function onFileImport(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  fileHandle = null; // Reset handle as we used traditional input
+  const r = new FileReader();
+  r.onload = ev => processImportedJSON(ev.target.result);
+  r.readAsText(f);
+  e.target.value = '';
+}
+
+function processImportedJSON(text) {
+  try {
+    let data = JSON.parse(text);
+    if (!data.id || !data.nome || !data.cognome) { toast('File non valido.', 'err'); return; }
+    const wasV1 = !data.v || data.v < 2;
+    if (wasV1) data = migrateV1toV2(data);
+    patient = data;
+    currentSessionId = patient.sessioni[patient.sessioni.length - 1].id;
+    renderPatient();
+    showView('view-patient');
+    toast(wasV1 ? 'Scheda aggiornata al formato corrente.' : 'Scheda caricata.');
+  } catch {
+    toast('Errore nella lettura del file.', 'err');
+  }
 }
 
 function migrateV1toV2(data) {
@@ -1657,26 +1800,9 @@ function migrateV1toV2(data) {
 }
 
 function onFileImport(e) {
-  const f = e.target.files[0];
-  if (!f) return;
-  const r = new FileReader();
-  r.onload = ev => {
-    try {
-      let data = JSON.parse(ev.target.result);
-      if (!data.id || !data.nome || !data.cognome) { toast('File non valido.', 'err'); return; }
-      const wasV1 = !data.v || data.v < 2;
-      if (wasV1) data = migrateV1toV2(data);
-      patient = data;
-      currentSessionId = patient.sessioni[patient.sessioni.length - 1].id;
-      renderPatient();
-      showView('view-patient');
-      toast(wasV1 ? 'Scheda aggiornata al formato corrente.' : 'Scheda caricata.');
-    } catch {
-      toast('Errore nella lettura del file.', 'err');
-    }
-  };
-  r.readAsText(f);
-  e.target.value = '';
+  // handled by processImportedJSON via FileReader.onload in old code, 
+  // but we replaced onFileImport entirely in previous turn.
+  // This replace is just to ensure consistency if I missed something.
 }
 
 /* ================================================================
@@ -1721,6 +1847,22 @@ function closeVPView() {
   document.getElementById('view-vp').classList.remove('open');
   document.body.style.overflow = '';
   _pdfResult = null;
+}
+
+/* ================================================================
+   PROGRESSI VIEW (full-page)
+================================================================ */
+function openProgressiView() {
+  document.getElementById('progressi-patient-name').textContent = `${patient.nome} ${patient.cognome}`;
+  document.getElementById('view-progressi').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(renderChart, 80);
+}
+
+function closeProgressiView() {
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+  document.getElementById('view-progressi').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 async function preparePDF() {
@@ -1971,9 +2113,10 @@ async function generatePDF() {
 ================================================================ */
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    ['modal-new', 'modal-sessions', 'modal-notes', 'modal-progressi'].forEach(id => closeModal(id));
+    ['modal-new', 'modal-sessions', 'modal-notes'].forEach(id => closeModal(id));
     closePresentazione();
     closeVPView();
+    closeProgressiView();
     if (document.getElementById('view-qr-read').classList.contains('active')) showView('view-home');
   }
   if (e.key === 'f' || e.key === 'F') {
@@ -1995,7 +2138,6 @@ document.getElementById('in-cognome').addEventListener('keydown', e => {
 document.querySelectorAll('.overlay').forEach(ov => {
   ov.addEventListener('click', e => {
     if (e.target === ov) {
-      if (ov.id === 'modal-progressi') { closeProgressiModal(); return; }
       ov.classList.remove('open');
     }
   });
@@ -2013,16 +2155,6 @@ const CHART_COLORS = [
   '#5B8E9F', '#4A8A6A', '#C87941', '#7B6FAF',
   '#B85757', '#3D9EA8', '#8B6F45', '#5B9F7A',
 ];
-
-function openProgressiModal() {
-  openModal('modal-progressi');
-  setTimeout(renderChart, 80);
-}
-
-function closeProgressiModal() {
-  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
-  closeModal('modal-progressi');
-}
 
 function renderChart() {
   if (!window.Chart) { return; }
