@@ -25,6 +25,7 @@
       --danger:        #B85757;
       --danger-bg:     #FAEAEA;
       --success:       #4A8A6A;
+      --warn:          #C87941;
       --r:             14px;
       --r-sm:          9px;
       --r-xs:          5px;
@@ -90,7 +91,6 @@
       font-family: 'Lora', Georgia, serif;
       font-style: italic;
       font-size: 14px;
-      color: var(--border);
       color: #a0b8bf;
     }
 
@@ -265,7 +265,7 @@
        PATIENT CONTENT
     ============================================================ */
     .patient-body {
-      max-width: 820px;
+      max-width: 900px;
       margin: 40px auto;
       padding: 0 32px 80px;
     }
@@ -351,20 +351,41 @@
       color: var(--border);
     }
 
-    /* Score display area */
+    /* ===== SCORE COLUMNS ===== */
     .act-score-wrap {
       flex-shrink: 0;
       display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .score-col {
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 3px;
+    }
+
+    .score-col-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-2);
+    }
+
+    .score-input-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .act-score-input {
-      width: 70px;
-      padding: 8px 4px;
+      width: 64px;
+      padding: 6px 4px;
       border: 1.5px solid var(--border);
       border-radius: var(--r-sm);
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       font-family: 'Lora', Georgia, serif;
       text-align: center;
@@ -380,6 +401,14 @@
     .act-score-input:focus {
       border-color: var(--primary);
     }
+
+    /* Vissuto states */
+    .vissuto-input { border-style: dashed; }
+    .vissuto-input::placeholder { color: var(--border); font-size: 18px; font-family: 'Inter', sans-serif; }
+    .vissuto-empty  { border-color: var(--border); color: var(--text-2); }
+    .vissuto-better { border-color: var(--success); border-style: solid; color: var(--success); }
+    .vissuto-worse  { border-color: var(--warn);    border-style: solid; color: var(--warn); }
+    .vissuto-same   { border-color: var(--border);  border-style: solid; color: var(--primary); }
 
     .score-denom {
       font-size: 13px;
@@ -607,12 +636,13 @@
     /* ============================================================
        RESPONSIVE TWEAKS
     ============================================================ */
-    @media (max-width: 600px) {
+    @media (max-width: 640px) {
       .patient-bar { padding: 12px 16px; }
       .patient-body { padding: 0 16px 60px; margin-top: 28px; }
       .bar-actions .btn { display: none; }
       .bar-actions .btn-cta { display: inline-flex; }
-      .act-score-input { width: 58px; font-size: 22px; }
+      .act-score-input { width: 52px; font-size: 20px; }
+      .score-col-label { display: none; }
       .home-acronym { font-size: 52px; }
     }
   </style>
@@ -729,8 +759,8 @@
 /* ================================================================
    STATE
 ================================================================ */
-let patient = null;   // { id, nome, cognome, attivita: [{id, desc, score, sel}] }
-let blurSortPending = false;
+let patient = null;         // v2 schema
+let currentSessionId = null;
 
 /* ================================================================
    UTILS
@@ -748,6 +778,10 @@ function esc(s) {
           .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
 
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 function toast(msg, type = 'ok') {
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -755,6 +789,21 @@ function toast(msg, type = 'ok') {
   void el.offsetWidth;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+/* ================================================================
+   SESSION HELPERS
+================================================================ */
+function activeSession() {
+  return patient?.sessioni?.find(s => s.id === currentSessionId) ?? null;
+}
+
+function activePunteggi() {
+  return activeSession()?.punteggi ?? [];
+}
+
+function punteggio(attivita_id) {
+  return activePunteggi().find(p => p.attivita_id === attivita_id) ?? null;
 }
 
 /* ================================================================
@@ -770,6 +819,7 @@ function goHome() {
     if (!confirm('Tornando alla home perderai le modifiche non salvate. Continuare?')) return;
   }
   patient = null;
+  currentSessionId = null;
   showView('view-home');
 }
 
@@ -794,7 +844,22 @@ function createPatient() {
   const cognome = document.getElementById('in-cognome').value.trim();
   if (!nome || !cognome) { toast('Inserisci nome e cognome.', 'err'); return; }
 
-  patient = { id: uid4(), nome, cognome, attivita: [] };
+  const sessId = 'sess_' + uidAct();
+  patient = {
+    v: 2,
+    id: uid4(),
+    nome,
+    cognome,
+    attivita: [],
+    sessioni: [{
+      id: sessId,
+      data: today(),
+      locked: false,
+      notePrivate: '',
+      punteggi: []
+    }]
+  };
+  currentSessionId = sessId;
   closeModal('modal-new');
   renderPatient();
   showView('view-patient');
@@ -815,15 +880,29 @@ function renderPatient() {
    ACTIVITIES
 ================================================================ */
 function sorted() {
-  return [...patient.attivita].sort((a, b) => a.score - b.score);
+  const sess = activeSession();
+  if (!sess) return [];
+  return [...patient.attivita].sort((a, b) => {
+    const pa = sess.punteggi.find(p => p.attivita_id === a.id)?.stimato ?? 0;
+    const pb = sess.punteggi.find(p => p.attivita_id === b.id)?.stimato ?? 0;
+    return pa - pb;
+  });
+}
+
+function vissutoClass(vissuto, stimato) {
+  if (vissuto === null || vissuto === undefined) return 'vissuto-empty';
+  if (vissuto < stimato) return 'vissuto-better';
+  if (vissuto > stimato) return 'vissuto-worse';
+  return 'vissuto-same';
 }
 
 function renderActivities() {
   const list  = document.getElementById('act-list');
   const empty = document.getElementById('act-empty');
   const items = sorted();
+  const sess  = activeSession();
 
-  if (items.length === 0) {
+  if (!items.length) {
     list.style.display = 'none';
     empty.style.display = '';
     return;
@@ -832,38 +911,66 @@ function renderActivities() {
   list.style.display = 'flex';
   empty.style.display = 'none';
 
-  list.innerHTML = items.map((a, i) => `
-    <div class="act-row${a.sel ? ' is-selected' : ''}" data-id="${a.id}">
-      <input type="checkbox" class="act-check" ${a.sel ? 'checked' : ''}
+  list.innerHTML = items.map((a, i) => {
+    const p        = sess?.punteggi.find(p => p.attivita_id === a.id);
+    const stimato  = p?.stimato ?? 0;
+    const vissuto  = p?.vissuto ?? null;
+    const sel      = p?.sel ?? false;
+    const vc       = vissutoClass(vissuto, stimato);
+    const vissVal  = vissuto !== null ? vissuto : '';
+
+    return `
+    <div class="act-row${sel ? ' is-selected' : ''}" data-id="${a.id}">
+      <input type="checkbox" class="act-check" ${sel ? 'checked' : ''}
              onchange="toggleSel('${a.id}', this.checked)">
       <span class="act-rank">${i + 1}</span>
       <input type="text" class="act-desc-input" value="${esc(a.desc)}"
              placeholder="Descrivi l'attività..."
              oninput="updateDesc('${a.id}', this.value)">
       <div class="act-score-wrap">
-        <input type="number" class="act-score-input" value="${a.score}"
-               min="0" max="100"
-               oninput="updateScore('${a.id}', this.value)"
-               onblur="sortOnBlur()">
-        <span class="score-denom">/100</span>
+        <div class="score-col">
+          <span class="score-col-label">Stimato</span>
+          <div class="score-input-row">
+            <input type="number" class="act-score-input" value="${stimato}"
+                   min="0" max="100"
+                   oninput="updateStimato('${a.id}', this.value)"
+                   onblur="sortOnBlur()">
+            <span class="score-denom">/100</span>
+          </div>
+        </div>
+        <div class="score-col">
+          <span class="score-col-label">Vissuto</span>
+          <div class="score-input-row">
+            <input type="number" class="act-score-input vissuto-input ${vc}"
+                   value="${vissVal}" min="0" max="100" placeholder="—"
+                   oninput="updateVissuto('${a.id}', this.value)">
+            <span class="score-denom">/100</span>
+          </div>
+        </div>
       </div>
       <button class="btn-del" onclick="deleteActivity('${a.id}')" title="Elimina">&#215;</button>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function addActivity() {
-  patient.attivita.push({ id: uidAct(), desc: '', score: 0, sel: false });
+  const actId = uidAct();
+  patient.attivita.push({ id: actId, desc: '' });
+  patient.sessioni.forEach(sess => {
+    sess.punteggi.push({ attivita_id: actId, stimato: 0, vissuto: null, sel: false });
+  });
   renderActivities();
   syncVPBtn();
   autoSave();
-  // focus on new description input
   const inputs = document.querySelectorAll('.act-desc-input');
   if (inputs.length) inputs[inputs.length - 1].focus();
 }
 
 function deleteActivity(id) {
   patient.attivita = patient.attivita.filter(a => a.id !== id);
+  patient.sessioni.forEach(sess => {
+    sess.punteggi = sess.punteggi.filter(p => p.attivita_id !== id);
+  });
   renderActivities();
   syncVPBtn();
   autoSave();
@@ -875,26 +982,45 @@ function updateDesc(id, val) {
   autoSave();
 }
 
-function updateScore(id, val) {
-  const a = patient.attivita.find(a => a.id === id);
-  if (a) {
-    let v = parseInt(val);
-    if (isNaN(v)) v = 0;
-    v = Math.max(0, Math.min(100, v));
-    a.score = v;
+function updateStimato(id, val) {
+  const p = punteggio(id);
+  if (!p) return;
+  let v = parseInt(val);
+  if (isNaN(v)) v = 0;
+  p.stimato = Math.max(0, Math.min(100, v));
+  // refresh vissuto color live without full re-render
+  const row = document.querySelector(`.act-row[data-id="${id}"]`);
+  if (row) {
+    const vi = row.querySelector('.vissuto-input');
+    if (vi) updateVissutoClass(vi, p.vissuto, p.stimato);
   }
   autoSave();
 }
 
+function updateVissuto(id, val) {
+  const p = punteggio(id);
+  if (!p) return;
+  p.vissuto = (val === '' || val === null) ? null : Math.max(0, Math.min(100, parseInt(val) || 0));
+  const row = document.querySelector(`.act-row[data-id="${id}"]`);
+  if (row) {
+    const vi = row.querySelector('.vissuto-input');
+    if (vi) updateVissutoClass(vi, p.vissuto, p.stimato);
+  }
+  autoSave();
+}
+
+function updateVissutoClass(el, vissuto, stimato) {
+  el.classList.remove('vissuto-empty', 'vissuto-better', 'vissuto-worse', 'vissuto-same');
+  el.classList.add(vissutoClass(vissuto, stimato));
+}
+
 function sortOnBlur() {
-  // small timeout so the input value is committed before re-render
   setTimeout(renderActivities, 50);
 }
 
 function toggleSel(id, checked) {
-  const a = patient.attivita.find(a => a.id === id);
-  if (a) a.sel = checked;
-  // toggle CSS class directly (no full re-render needed)
+  const p = punteggio(id);
+  if (p) p.sel = checked;
   const row = document.querySelector(`.act-row[data-id="${id}"]`);
   if (row) row.classList.toggle('is-selected', checked);
   syncVPBtn();
@@ -902,7 +1028,7 @@ function toggleSel(id, checked) {
 }
 
 function syncVPBtn() {
-  const any = patient && patient.attivita.some(a => a.sel);
+  const any = activePunteggi().some(p => p.sel);
   document.getElementById('btn-vp').disabled = !any;
 }
 
@@ -928,28 +1054,51 @@ function triggerImport() {
   document.getElementById('file-import').click();
 }
 
+function migrateV1toV2(data) {
+  const attivita = (data.attivita || []).map(a => ({
+    id:   a.id   || uidAct(),
+    desc: a.desc || a.descrizione || ''
+  }));
+  const sessId = 'sess_' + uidAct();
+  return {
+    v: 2,
+    id: data.id,
+    nome: data.nome,
+    cognome: data.cognome,
+    attivita,
+    sessioni: [{
+      id: sessId,
+      data: today(),
+      locked: false,
+      notePrivate: '',
+      punteggi: (data.attivita || []).map((a, i) => ({
+        attivita_id: attivita[i].id,
+        stimato: a.score ?? a.punteggio ?? 0,
+        vissuto: null,
+        sel: a.sel ?? a.selected ?? false
+      }))
+    }]
+  };
+}
+
 function onFileImport(e) {
   const f = e.target.files[0];
   if (!f) return;
   const r = new FileReader();
   r.onload = ev => {
     try {
-      const data = JSON.parse(ev.target.result);
-      if (data.id && data.nome && data.cognome && Array.isArray(data.attivita)) {
-        // Normalize old-format fields if needed
-        data.attivita = data.attivita.map(a => ({
-          id:    a.id    || uidAct(),
-          desc:  a.desc  || a.descrizione || '',
-          score: a.score ?? a.punteggio ?? 0,
-          sel:   a.sel   ?? a.selected   ?? false,
-        }));
-        patient = data;
-        renderPatient();
-        showView('view-patient');
-        toast('Scheda caricata.');
-      } else {
+      let data = JSON.parse(ev.target.result);
+      if (!data.id || !data.nome || !data.cognome) {
         toast('File non valido.', 'err');
+        return;
       }
+      const wasV1 = !data.v || data.v < 2;
+      if (wasV1) data = migrateV1toV2(data);
+      patient = data;
+      currentSessionId = patient.sessioni[patient.sessioni.length - 1].id;
+      renderPatient();
+      showView('view-patient');
+      toast(wasV1 ? 'Scheda aggiornata al formato corrente.' : 'Scheda caricata.');
     } catch {
       toast('Errore nella lettura del file.', 'err');
     }
@@ -962,23 +1111,29 @@ function onFileImport(e) {
    VP MODAL
 ================================================================ */
 function openVPModal() {
-  const sel = sorted().filter(a => a.sel);
-  if (!sel.length) { toast('Seleziona almeno un\'attività.', 'err'); return; }
+  const sess = activeSession();
+  if (!sess) return;
+  const selActs = sorted().filter(a => {
+    const p = sess.punteggi.find(p => p.attivita_id === a.id);
+    return p?.sel;
+  });
+  if (!selActs.length) { toast('Seleziona almeno un\'attività.', 'err'); return; }
 
   document.getElementById('vp-general').value = '';
-
-  document.getElementById('vp-acts').innerHTML = sel.map(a => `
+  document.getElementById('vp-acts').innerHTML = selActs.map(a => {
+    const p = sess.punteggi.find(p => p.attivita_id === a.id);
+    return `
     <div class="vp-act-card">
       <div class="vp-act-top">
-        <span class="vp-badge">${a.score}</span>
+        <span class="vp-badge">${p?.stimato ?? 0}</span>
         <span class="vp-act-name">${esc(a.desc) || '(attività senza nome)'}</span>
       </div>
       <label class="vp-note-label">Nota per questa attività</label>
       <textarea class="field-textarea" data-id="${a.id}"
                 placeholder="Inserisci una nota specifica..."
                 style="min-height:64px"></textarea>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 
   openModal('modal-vp');
 }
@@ -990,14 +1145,19 @@ function generatePDF() {
   const { jsPDF } = window.jspdf;
   if (!jsPDF) { toast('jsPDF non caricato. Connetti Internet e riprova.', 'err'); return; }
 
+  const sess = activeSession();
+  const selActs = sorted().filter(a => {
+    const p = sess?.punteggi.find(p => p.attivita_id === a.id);
+    return p?.sel;
+  });
+
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const PW  = doc.internal.pageSize.getWidth();   // 210
-  const PH  = doc.internal.pageSize.getHeight();  // 297
+  const PW  = doc.internal.pageSize.getWidth();
+  const PH  = doc.internal.pageSize.getHeight();
   const ML  = 22, MR = 22;
-  const CW  = PW - ML - MR;  // ~166mm
+  const CW  = PW - ML - MR;
   let y     = 0;
 
-  // ---- palette ----
   const C_PRIMARY   = [91, 142, 159];
   const C_PRIMARY_D = [61, 110, 126];
   const C_TEXT      = [37,  50,  56];
@@ -1005,46 +1165,29 @@ function generatePDF() {
   const C_LIGHT     = [227, 239, 243];
   const C_WHITE     = [255, 255, 255];
 
-  // ---- layout constants (all mm) ----
-  // Card internal structure:
-  //   [CPT]                          <- top padding
-  //   [badge BH=14]  [name lines]    <- top block height = max(BH, nameLines*NLH)
-  //   [NGAP]                         <- gap before note (only if note exists)
-  //   [NLABEL_H]  [note lines*NoteLH]<- note block (only if note exists)
-  //   [CPB]                          <- bottom padding
-  const CPT      = 13;   // card padding top (mm)
-  const CPB      = 13;   // card padding bottom (mm)
-  const CPL      = 8;    // card left inner margin (from ML)
-  const BW       = 26;   // badge width
-  const BH       = 14;   // badge height
-  const BX       = ML + CPL;
-  const NX       = BX + BW + 8;       // name text x
-  const NW       = CW - CPL - BW - 8 - 4; // name text max width (~120mm)
-  const NFS      = 12;   // name font size (pt)
-  const NLH      = 8;    // name line height (mm) — generous
-  const NGAP     = 10;   // vertical gap between top block and note section
-  const NLFS     = 8.5;  // "Nota:" label font size
-  const NLABEL_H = 7;    // height consumed by the "Nota:" label line
-  const NoteFS   = 10.5; // note text font size
-  const NoteLH   = 7;    // note line height (mm) — generous
-  const NoteX    = ML + CPL + 4;          // note text x
-  const NoteW    = CW - CPL - 4 - 4;     // note text max width (~150mm)
-  const CG       = 8;    // gap between cards
+  const CPT = 13, CPB = 13, CPL = 8;
+  const BW  = 26, BH  = 14;
+  const BX  = ML + CPL;
+  const NX  = BX + BW + 8;
+  const NW  = CW - CPL - BW - 8 - 4;
+  const NFS = 12, NLH = 8;
+  const NGAP = 10, NLFS = 8.5, NLABEL_H = 7;
+  const NoteFS = 10.5, NoteLH = 7;
+  const NoteX = ML + CPL + 4;
+  const NoteW = CW - CPL - 4 - 4;
+  const CG  = 8;
 
-  // helper: render text line by line (full positional control)
   function lines(arr, x, startY, lh) {
     arr.forEach((ln, i) => doc.text(ln, x, startY + i * lh));
   }
 
-  // helper: add a new page and reset y
   function addPage() { doc.addPage(); y = 24; }
 
-  // helper: break page if remaining space < needed
   function checkY(needed) {
     if (y + needed > PH - 20) addPage();
   }
 
-  // ---- HEADER BAND ----
+  // Header band
   doc.setFillColor(...C_PRIMARY);
   doc.rect(0, 0, PW, 40, 'F');
   doc.setTextColor(...C_WHITE);
@@ -1057,42 +1200,34 @@ function generatePDF() {
   doc.text(`${patient.nome} ${patient.cognome}  ·  #${patient.id}  ·  ${dateStr}`, ML, 32);
   y = 52;
 
-  // ---- GENERAL COMMENT (if any) ----
+  // General comment
   const genComment = document.getElementById('vp-general').value.trim();
   if (genComment) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     const genLines = doc.splitTextToSize(genComment, CW - 16);
-    // box height: label(8) + gap(4) + lines + bottom pad(10)
-    const genBoxH = 8 + 4 + genLines.length * 7 + 10;
+    const genBoxH  = 8 + 4 + genLines.length * 7 + 10;
     checkY(genBoxH + 16);
 
-    // draw box
     doc.setFillColor(...C_LIGHT);
     doc.roundedRect(ML, y, CW, genBoxH, 3, 3, 'F');
-
-    // label
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8.5);
     doc.setTextColor(...C_TEXT2);
     doc.text('NOTE GENERALI', ML + 8, y + 8);
-
-    // text
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     doc.setTextColor(...C_TEXT);
-    lines(genLines, ML + 8, y + 8 + 4 + 7, 7);   // first baseline 4mm below label, then 7mm spacing
-
+    lines(genLines, ML + 8, y + 8 + 4 + 7, 7);
     y += genBoxH + 14;
 
-    // divider
     doc.setDrawColor(...C_LIGHT);
     doc.setLineWidth(0.4);
     doc.line(ML, y, PW - MR, y);
     y += 12;
   }
 
-  // ---- SECTION LABEL ----
+  // Section label
   checkY(18);
   doc.setTextColor(...C_TEXT2);
   doc.setFont('helvetica', 'bold');
@@ -1100,72 +1235,57 @@ function generatePDF() {
   doc.text('ATTIVITÀ SELEZIONATE — ORDINATE PER PUNTEGGIO CRESCENTE', ML, y);
   y += 12;
 
-  // ---- COLLECT DATA ----
-  const selActs = sorted().filter(a => a.sel);
+  // Note map from modal
   const noteMap = {};
   document.querySelectorAll('#vp-acts textarea[data-id]').forEach(ta => {
     noteMap[ta.dataset.id] = ta.value.trim();
   });
 
-  // ---- DRAW EACH ACTIVITY CARD ----
+  // Activity cards
   selActs.forEach(act => {
+    const p = sess?.punteggi.find(p => p.attivita_id === act.id);
+    const stimato = p?.stimato ?? 0;
 
-    // --- measure name ---
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(NFS);
     const nameLines = doc.splitTextToSize(act.desc || '(attività senza nome)', NW);
 
-    // --- measure note ---
     const note = noteMap[act.id] || '';
     doc.setFont('helvetica', 'italic');
     doc.setFontSize(NoteFS);
     const noteLines = note ? doc.splitTextToSize(note, NoteW) : [];
     const hasNote   = noteLines.length > 0;
 
-    // --- calculate exact card height ---
-    // Top block: badge (BH=14) and name text side by side, height = max of the two
-    const nameBlockH  = nameLines.length * NLH;
-    const topBlockH   = Math.max(BH, nameBlockH);
-    // Note block (only if note present): gap + label line + note lines
-    const noteBlockH  = hasNote ? NGAP + NLABEL_H + noteLines.length * NoteLH : 0;
-    const cardH       = CPT + topBlockH + noteBlockH + CPB;
+    const nameBlockH = nameLines.length * NLH;
+    const topBlockH  = Math.max(BH, nameBlockH);
+    const noteBlockH = hasNote ? NGAP + NLABEL_H + noteLines.length * NoteLH : 0;
+    const cardH      = CPT + topBlockH + noteBlockH + CPB;
 
     checkY(cardH + CG);
 
-    // --- card background ---
     doc.setFillColor(...C_LIGHT);
     doc.roundedRect(ML, y, CW, cardH, 3, 3, 'F');
 
-    // --- badge (top-aligned with content area) ---
-    const bTopY  = y + CPT;
+    const bTopY = y + CPT;
     doc.setFillColor(...C_PRIMARY);
     doc.roundedRect(BX, bTopY, BW, BH, 3, 3, 'F');
     doc.setTextColor(...C_WHITE);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
-    // badge text: vertically centered in badge
-    // for 11pt: baseline ≈ BH/2 + 2mm below badge top
-    doc.text(String(act.score), BX + BW / 2, bTopY + BH / 2 + 2.2, { align: 'center' });
+    doc.text(String(stimato), BX + BW / 2, bTopY + BH / 2 + 2.2, { align: 'center' });
 
-    // --- name text (baseline of first line aligned near badge top) ---
-    // For 12pt: cap-height offset ≈ 3.6mm → baseline = bTopY + 3.6 ≈ bTopY + 4
     const nameBaseY = bTopY + 4;
     doc.setTextColor(...C_TEXT);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(NFS);
     lines(nameLines, NX, nameBaseY, NLH);
 
-    // --- note section (strictly below the top block) ---
     if (hasNote) {
       const noteSectionY = y + CPT + topBlockH + NGAP;
-
-      // "Nota:" label
       doc.setTextColor(...C_PRIMARY_D);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(NLFS);
       doc.text('Nota:', NoteX, noteSectionY + NLABEL_H - 1);
-
-      // note lines (first baseline = after label line)
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(NoteFS);
       doc.setTextColor(...C_TEXT2);
@@ -1175,7 +1295,7 @@ function generatePDF() {
     y += cardH + CG;
   });
 
-  // ---- PAGE FOOTER ----
+  // Page footer
   const totalPages = doc.internal.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
@@ -1199,7 +1319,7 @@ function generatePDF() {
 ================================================================ */
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    ['modal-new','modal-vp'].forEach(id => closeModal(id));
+    ['modal-new', 'modal-vp'].forEach(id => closeModal(id));
   }
 });
 
@@ -1211,34 +1331,11 @@ document.getElementById('in-cognome').addEventListener('keydown', e => {
   if (e.key === 'Enter') createPatient();
 });
 
-// click outside modal to close
 document.querySelectorAll('.overlay').forEach(ov => {
   ov.addEventListener('click', e => {
     if (e.target === ov) ov.classList.remove('open');
   });
 });
-
-/* ================================================================
-   RESTORE DRAFT
-================================================================ */
-// (optional: restore last unsaved session from localStorage)
-// Disabled by default — uncomment if desired:
-/*
-(function tryRestoreDraft() {
-  try {
-    const raw = localStorage.getItem('suds_draft');
-    if (!raw) return;
-    const d = JSON.parse(raw);
-    if (d && d.id && d.nome) {
-      if (confirm(`Riprendere la scheda non salvata di ${d.nome} ${d.cognome}?`)) {
-        patient = d;
-        renderPatient();
-        showView('view-patient');
-      }
-    }
-  } catch(e) {}
-})();
-*/
 </script>
 </body>
 </html>
