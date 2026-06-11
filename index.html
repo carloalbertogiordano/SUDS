@@ -1368,7 +1368,7 @@ function renderActivities() {
 
     return `
     <div class="act-row${sel ? ' is-selected' : ''}${locked ? ' is-locked' : ''}" data-id="${a.id}">
-      <input type="checkbox" class="act-check" ${sel ? 'checked' : ''} ${dis}
+      <input type="checkbox" class="act-check" ${sel ? 'checked' : ''}
              onchange="toggleSel('${a.id}', this.checked)">
       <span class="act-rank">${i + 1}</span>
       <input type="text" class="act-desc-input" value="${esc(a.desc)}"
@@ -1470,7 +1470,6 @@ function sortOnBlur() {
 }
 
 function toggleSel(id, checked) {
-  if (activeSession()?.locked) return;
   const p = punteggio(id);
   if (p) p.sel = checked;
   const row = document.querySelector(`.act-row[data-id="${id}"]`);
@@ -1480,11 +1479,7 @@ function toggleSel(id, checked) {
 }
 
 function syncVPBtn() {
-  const sess = activeSession();
-  // Locked sessions: PDF always generatable if there are activities
-  const any = sess?.locked
-    ? patient.attivita.length > 0
-    : activePunteggi().some(p => p.sel);
+  const any = activePunteggi().some(p => p.sel);
   document.getElementById('btn-vp').disabled = !any;
 }
 
@@ -1566,10 +1561,7 @@ function onFileImport(e) {
 function openVPModal() {
   const sess = activeSession();
   if (!sess) return;
-  // Locked sessions include all activities; unlocked only selected ones
-  const selActs = sess.locked
-    ? sorted()
-    : sorted().filter(a => sess.punteggi.find(p => p.attivita_id === a.id)?.sel);
+  const selActs = sorted().filter(a => sess.punteggi.find(p => p.attivita_id === a.id)?.sel);
   if (!selActs.length) { toast('Seleziona almeno un\'attività.', 'err'); return; }
 
   document.getElementById('vp-general').value = '';
