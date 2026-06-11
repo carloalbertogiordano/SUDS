@@ -889,6 +889,7 @@
       <button class="btn btn-outline btn-sm" onclick="openSessionsModal()" data-tooltip="Gestisci sessioni o creane una nuova">+ Sessione</button>
       <button class="btn btn-outline btn-sm" id="btn-lock" onclick="lockSession()" data-tooltip="Blocca la sessione (dati non più modificabili)">&#128274; Blocca</button>
       <span class="badge-locked" id="badge-locked" style="display:none">&#128274; Sessione bloccata</span>
+      <button class="btn btn-outline btn-sm" id="btn-unlock" style="display:none" onclick="unlockSession()" data-tooltip="Sblocca la sessione per modificarla di nuovo">&#128275; Sblocca</button>
       <button class="btn btn-outline btn-sm" onclick="openNotesModal()" data-tooltip="Note private di sessione (non appaiono nel PDF)">&#128221; Note</button>
       <button class="btn btn-outline btn-sm" onclick="openProgressiModal()" data-tooltip="Grafico andamento punteggi nel tempo">&#128200; Progressi</button>
       <button class="btn btn-outline btn-sm" onclick="openPresentazione()" data-tooltip="Modalità presentazione a schermo intero (tasto F)">&#9974; Presenta</button>
@@ -1185,15 +1186,19 @@ function renderSessionSelector() {
   const badgeLock = document.getElementById('badge-locked');
   const btnAdd    = document.getElementById('btn-add-act');
 
+  const btnUnlock = document.getElementById('btn-unlock');
+
   if (sess?.locked) {
     btnLock.style.display   = 'none';
     badgeLock.style.display = '';
+    btnUnlock.style.display = '';
     btnAdd.disabled         = true;
     btnAdd.style.opacity    = '.4';
     btnAdd.style.cursor     = 'not-allowed';
   } else {
     btnLock.style.display   = '';
     badgeLock.style.display = 'none';
+    btnUnlock.style.display = 'none';
     btnAdd.disabled         = false;
     btnAdd.style.opacity    = '';
     btnAdd.style.cursor     = '';
@@ -1282,8 +1287,21 @@ function lockSession() {
   sess.locked = true;
   renderSessionSelector();
   renderActivities();
+  syncVPBtn();
   autoSave();
   toast('Sessione bloccata.');
+}
+
+function unlockSession() {
+  const sess = activeSession();
+  if (!sess) return;
+  if (!confirm('Sbloccare la sessione? I dati torneranno modificabili.')) return;
+  sess.locked = false;
+  renderSessionSelector();
+  renderActivities();
+  syncVPBtn();
+  autoSave();
+  toast('Sessione sbloccata.');
 }
 
 function openNotesModal() {
