@@ -1462,7 +1462,11 @@ function toggleSel(id, checked) {
 }
 
 function syncVPBtn() {
-  const any = activePunteggi().some(p => p.sel);
+  const sess = activeSession();
+  // Locked sessions: PDF always generatable if there are activities
+  const any = sess?.locked
+    ? patient.attivita.length > 0
+    : activePunteggi().some(p => p.sel);
   document.getElementById('btn-vp').disabled = !any;
 }
 
@@ -1544,7 +1548,10 @@ function onFileImport(e) {
 function openVPModal() {
   const sess = activeSession();
   if (!sess) return;
-  const selActs = sorted().filter(a => sess.punteggi.find(p => p.attivita_id === a.id)?.sel);
+  // Locked sessions include all activities; unlocked only selected ones
+  const selActs = sess.locked
+    ? sorted()
+    : sorted().filter(a => sess.punteggi.find(p => p.attivita_id === a.id)?.sel);
   if (!selActs.length) { toast('Seleziona almeno un\'attività.', 'err'); return; }
 
   document.getElementById('vp-general').value = '';
