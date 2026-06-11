@@ -49,11 +49,16 @@ function renderSessionSelector() {
   const badgeLock = document.getElementById('badge-locked');
   const btnAdd    = document.getElementById('btn-add-act');
   const btnUnlock = document.getElementById('btn-unlock');
+  const btnDel    = document.getElementById('btn-delete-session');
 
-  if (sess?.locked) {
+  const isLocked = sess?.locked ?? false;
+  const canDelete = !isLocked && patient.sessioni.length > 1;
+
+  if (isLocked) {
     if (btnLock) btnLock.style.display   = 'none';
     if (badgeLock) badgeLock.style.display = '';
     if (btnUnlock) btnUnlock.style.display = '';
+    if (btnDel) btnDel.style.display = 'none';
     if (btnAdd) {
         btnAdd.disabled         = true;
         btnAdd.style.opacity    = '.4';
@@ -63,6 +68,7 @@ function renderSessionSelector() {
     if (btnLock) btnLock.style.display   = '';
     if (badgeLock) badgeLock.style.display = 'none';
     if (btnUnlock) btnUnlock.style.display = 'none';
+    if (btnDel) btnDel.style.display = canDelete ? '' : 'none';
     if (btnAdd) {
         btnAdd.disabled         = false;
         btnAdd.style.opacity    = '';

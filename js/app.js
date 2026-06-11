@@ -6,7 +6,7 @@ function switchSessionModal(id) {
 }
 
 function deleteSession(event, id) {
-  event.stopPropagation();
+  if (event) event.stopPropagation();
   if (!confirm('Eliminare questa sessione? L\'operazione non può essere annullata.')) return;
   patient.sessioni = patient.sessioni.filter(s => s.id !== id);
   if (currentSessionId === id) {
@@ -17,6 +17,15 @@ function deleteSession(event, id) {
   renderActivities();
   syncVPBtn();
   autoSave();
+  toast('Sessione eliminata.');
+}
+
+function deleteCurrentSession() {
+  if (patient.sessioni.length <= 1) {
+    toast('Impossibile eliminare l\'unica sessione.', 'err');
+    return;
+  }
+  deleteSession(null, currentSessionId);
 }
 
 function createSession() {
