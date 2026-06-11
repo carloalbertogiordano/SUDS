@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
   <style>
     /* ===== TOKENS ===== */
@@ -638,6 +639,45 @@
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* ============================================================
+       TOOLTIPS
+    ============================================================ */
+    [data-tooltip] { position: relative; }
+
+    [data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: calc(100% + 7px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: var(--r-xs);
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .18s;
+      z-index: 500;
+    }
+
+    [data-tooltip]:hover::after { opacity: 1; }
+
+    /* ============================================================
+       QR READONLY VIEW
+    ============================================================ */
+    .qr-read-info {
+      font-size: 12px;
+      color: var(--text-2);
+      background: var(--primary-light);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 10px 14px;
+      margin-bottom: 20px;
+    }
+
+    /* ============================================================
        CHART MODAL
     ============================================================ */
     .modal-chart {
@@ -833,32 +873,32 @@
 
   <header class="patient-bar">
     <div class="patient-bar-top">
-      <button class="btn-back" onclick="goHome()">&#8592; Indietro</button>
+      <button class="btn-back" onclick="goHome()" data-tooltip="Torna alla home">&#8592; Indietro</button>
       <div class="patient-meta">
         <div class="patient-fullname" id="pt-name"></div>
         <div class="patient-code" id="pt-code"></div>
       </div>
       <div class="bar-actions">
-        <button class="btn btn-outline" onclick="exportJSON()">&#128190; Salva JSON</button>
-        <button class="btn btn-cta" id="btn-vp" onclick="openVPModal()" disabled>&#9654; Voglio provare</button>
+        <button class="btn btn-outline" onclick="exportJSON()" data-tooltip="Esporta scheda come file JSON">&#128190; Salva JSON</button>
+        <button class="btn btn-cta" id="btn-vp" onclick="openVPModal()" disabled data-tooltip="Genera PDF con le attività selezionate">&#9654; Voglio provare</button>
       </div>
     </div>
 
     <div class="patient-bar-sessions">
-      <select id="sess-select" class="sess-select" onchange="switchSession(this.value)"></select>
-      <button class="btn btn-outline btn-sm" onclick="openSessionsModal()">+ Sessione</button>
-      <button class="btn btn-outline btn-sm" id="btn-lock" onclick="lockSession()">&#128274; Blocca</button>
+      <select id="sess-select" class="sess-select" onchange="switchSession(this.value)" data-tooltip="Sessione attiva — clicca per cambiare"></select>
+      <button class="btn btn-outline btn-sm" onclick="openSessionsModal()" data-tooltip="Gestisci sessioni o creane una nuova">+ Sessione</button>
+      <button class="btn btn-outline btn-sm" id="btn-lock" onclick="lockSession()" data-tooltip="Blocca la sessione (dati non più modificabili)">&#128274; Blocca</button>
       <span class="badge-locked" id="badge-locked" style="display:none">&#128274; Sessione bloccata</span>
-      <button class="btn btn-outline btn-sm" onclick="openNotesModal()">&#128221; Note</button>
-      <button class="btn btn-outline btn-sm" onclick="openProgressiModal()">&#128200; Progressi</button>
-      <button class="btn btn-outline btn-sm" onclick="openPresentazione()">&#9974; Presenta</button>
+      <button class="btn btn-outline btn-sm" onclick="openNotesModal()" data-tooltip="Note private di sessione (non appaiono nel PDF)">&#128221; Note</button>
+      <button class="btn btn-outline btn-sm" onclick="openProgressiModal()" data-tooltip="Grafico andamento punteggi nel tempo">&#128200; Progressi</button>
+      <button class="btn btn-outline btn-sm" onclick="openPresentazione()" data-tooltip="Modalità presentazione a schermo intero (tasto F)">&#9974; Presenta</button>
     </div>
   </header>
 
   <div class="patient-body">
     <div class="sec-head">
       <span class="sec-label">Attività e punteggi SUDS</span>
-      <button class="btn btn-primary btn-sm" id="btn-add-act" onclick="addActivity()">+ Aggiungi attività</button>
+      <button class="btn btn-primary btn-sm" id="btn-add-act" onclick="addActivity()" data-tooltip="Aggiunge una nuova attività alla gerarchia">+ Aggiungi attività</button>
     </div>
 
     <div class="act-list" id="act-list"></div>
@@ -943,8 +983,11 @@
     <div id="vp-acts"></div>
 
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-vp')">Annulla</button>
-      <button class="btn btn-primary" onclick="generatePDF()">Genera PDF</button>
+      <button class="btn btn-outline" id="vp-annulla-btn" onclick="closeVPModal()">Annulla</button>
+      <button class="btn btn-primary" id="vp-genera-btn" onclick="preparePDF()">Genera PDF</button>
+      <button class="btn btn-outline" id="vp-chiudi-btn" style="display:none" onclick="closeVPModal()">Chiudi</button>
+      <button class="btn btn-outline" id="vp-share-btn" style="display:none" onclick="sharePDF()" data-tooltip="Condividi via AirDrop, WhatsApp, Mail…">&#128257; Condividi</button>
+      <button class="btn btn-primary" id="vp-download-btn" style="display:none" onclick="downloadPDF()" data-tooltip="Scarica il PDF sul dispositivo">&#8681; Scarica PDF</button>
     </div>
   </div>
 </div>
@@ -971,6 +1014,26 @@
     <button class="btn-presenta-close" onclick="closePresentazione()">&#215; Chiudi</button>
   </div>
   <div class="presenta-body" id="presenta-body"></div>
+</div>
+
+<!-- ==================== VIEW: QR scheda readonly ==================== -->
+<div id="view-qr-read" class="view">
+  <header class="patient-bar" style="flex-direction:row;align-items:center;gap:16px;">
+    <div class="patient-meta">
+      <div class="patient-fullname" id="qr-patient-name"></div>
+      <div class="patient-code" id="qr-session-date"></div>
+    </div>
+    <div class="bar-actions">
+      <button class="btn btn-outline" onclick="window.print()" data-tooltip="Stampa questa scheda">&#128424; Stampa</button>
+    </div>
+  </header>
+  <div class="patient-body">
+    <p class="qr-read-info">&#128274; Scheda in sola lettura — generata tramite QR code.</p>
+    <div class="sec-head">
+      <span class="sec-label">Attività</span>
+    </div>
+    <div class="act-list" id="qr-act-list"></div>
+  </div>
 </div>
 
 <!-- ==================== TOAST ==================== -->
@@ -1504,11 +1567,84 @@ function openVPModal() {
 }
 
 /* ================================================================
+   VP MODAL FLOW (prepare → download / share)
+================================================================ */
+let _pdfResult = null;
+
+function closeVPModal() {
+  closeModal('modal-vp');
+  _pdfResult = null;
+  document.getElementById('vp-annulla-btn').style.display = '';
+  document.getElementById('vp-genera-btn').style.display  = '';
+  document.getElementById('vp-chiudi-btn').style.display  = 'none';
+  document.getElementById('vp-share-btn').style.display   = 'none';
+  document.getElementById('vp-download-btn').style.display = 'none';
+}
+
+async function preparePDF() {
+  const btn = document.getElementById('vp-genera-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generazione…';
+  try {
+    _pdfResult = await generatePDF();
+    if (!_pdfResult) return;
+    document.getElementById('vp-annulla-btn').style.display = 'none';
+    document.getElementById('vp-genera-btn').style.display  = 'none';
+    document.getElementById('vp-chiudi-btn').style.display  = '';
+    document.getElementById('vp-download-btn').style.display = '';
+    const canShare = typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
+    document.getElementById('vp-share-btn').style.display = canShare ? '' : 'none';
+    toast('PDF pronto.');
+  } catch(e) {
+    toast('Errore nella generazione del PDF.', 'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Genera PDF';
+  }
+}
+
+function downloadPDF() {
+  if (!_pdfResult) return;
+  const url = URL.createObjectURL(_pdfResult.blob);
+  const a   = document.createElement('a');
+  a.href     = url;
+  a.download = _pdfResult.fname;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('PDF salvato.');
+}
+
+async function sharePDF() {
+  if (!_pdfResult) return;
+  const file = new File([_pdfResult.blob], _pdfResult.fname, { type: 'application/pdf' });
+  try {
+    await navigator.share({ title: 'Voglio Provare', files: [file] });
+  } catch(e) {
+    if (e.name !== 'AbortError') toast('Condivisione non riuscita.', 'err');
+  }
+}
+
+/* ================================================================
    PDF
 ================================================================ */
-function generatePDF() {
+function b64encode(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+function buildQRPayload(selActs, sess) {
+  return {
+    nome:     `${patient.nome} ${patient.cognome}`,
+    data:     sess?.data ?? today(),
+    attivita: selActs.map(a => {
+      const p = sess?.punteggi.find(p => p.attivita_id === a.id);
+      return { desc: a.desc, stimato: p?.stimato ?? 0, vissuto: p?.vissuto ?? null };
+    }),
+  };
+}
+
+async function generatePDF() {
   const { jsPDF } = window.jspdf;
-  if (!jsPDF) { toast('jsPDF non caricato. Connetti Internet e riprova.', 'err'); return; }
+  if (!jsPDF) { toast('jsPDF non caricato. Connetti Internet e riprova.', 'err'); return null; }
 
   const sess    = activeSession();
   const selActs = sorted().filter(a => sess?.punteggi.find(p => p.attivita_id === a.id)?.sel);
@@ -1650,6 +1786,28 @@ function generatePDF() {
     y += cardH + CG;
   });
 
+  // QR code — bottom-right of last page
+  try {
+    if (window.QRCode) {
+      const payload    = buildQRPayload(selActs, sess);
+      const payloadStr = JSON.stringify(payload);
+      const encoded    = b64encode(payloadStr);
+      const qrUrl      = `https://carloalbertogiordano.github.io/SUDS/#view=voglio-provare&data=${encodeURIComponent(encoded)}`;
+      if (qrUrl.length <= 1800) {
+        const qrDataUrl = await QRCode.toDataURL(qrUrl, { width: 200, margin: 1, color: { dark: '#3D6E7E', light: '#FFFFFF' } });
+        const lastPage  = doc.internal.getNumberOfPages();
+        doc.setPage(lastPage);
+        const qrX = PW - MR - 26;
+        const qrY = PH - 38;
+        doc.addImage(qrDataUrl, 'PNG', qrX, qrY, 24, 24);
+        doc.setFontSize(6.5);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...C_TEXT2);
+        doc.text('Scansiona per rileggere', qrX + 12, qrY + 25.5, { align: 'center' });
+      }
+    }
+  } catch(e) { /* QR non bloccante */ }
+
   const totalPages = doc.internal.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
@@ -1663,9 +1821,8 @@ function generatePDF() {
   }
 
   const fname = `VoglioProvare_${patient.cognome}_${patient.id}_${new Date().toLocaleDateString('it-IT').replace(/\//g, '-')}.pdf`;
-  doc.save(fname);
-  toast('PDF generato.');
-  closeModal('modal-vp');
+  const blob  = doc.output('blob');
+  return { blob, fname };
 }
 
 /* ================================================================
@@ -1675,6 +1832,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     ['modal-new', 'modal-sessions', 'modal-notes', 'modal-vp', 'modal-progressi'].forEach(id => closeModal(id));
     closePresentazione();
+    if (document.getElementById('view-qr-read').classList.contains('active')) showView('view-home');
   }
   if (e.key === 'f' || e.key === 'F') {
     const inInput = ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
@@ -1696,10 +1854,14 @@ document.querySelectorAll('.overlay').forEach(ov => {
   ov.addEventListener('click', e => {
     if (e.target === ov) {
       if (ov.id === 'modal-progressi') { closeProgressiModal(); return; }
+      if (ov.id === 'modal-vp') { closeVPModal(); return; }
       ov.classList.remove('open');
     }
   });
 });
+
+// Check for QR hash on load
+initFromHash();
 
 /* ================================================================
    PROGRESSI — CHART.JS
@@ -1836,6 +1998,59 @@ function openPresentazione() {
 function closePresentazione() {
   document.getElementById('view-presenta').classList.remove('open');
   document.body.style.overflow = '';
+}
+
+/* ================================================================
+   QR READONLY VIEW
+================================================================ */
+function initFromHash() {
+  const hash  = window.location.hash;
+  const match = hash.match(/^#view=voglio-provare&data=(.+)$/);
+  if (!match) return;
+  try {
+    const decoded = decodeURIComponent(escape(atob(decodeURIComponent(match[1]))));
+    const data    = JSON.parse(decoded);
+    if (!data.nome || !Array.isArray(data.attivita)) return;
+    renderQRView(data);
+    showView('view-qr-read');
+  } catch(e) {
+    console.warn('QR decode failed:', e);
+  }
+}
+
+function renderQRView(data) {
+  document.getElementById('qr-patient-name').textContent = data.nome;
+  document.getElementById('qr-session-date').textContent  = `Sessione del ${formatDate(data.data)}`;
+
+  document.getElementById('qr-act-list').innerHTML = data.attivita.map((a, i) => {
+    const visHtml = a.vissuto !== null ? (() => {
+      const cls = a.vissuto < a.stimato ? 'var(--success)' : a.vissuto > a.stimato ? 'var(--warn)' : 'var(--primary)';
+      return `
+        <div class="score-col">
+          <span class="score-col-label">Vissuto</span>
+          <div class="score-input-row">
+            <span style="font-size:24px;font-weight:700;font-family:'Lora',serif;color:${cls}">${a.vissuto}</span>
+            <span class="score-denom">/100</span>
+          </div>
+        </div>`;
+    })() : '';
+
+    return `
+    <div class="act-row">
+      <span class="act-rank">${i + 1}</span>
+      <span style="flex:1;padding:4px 8px;font-size:16px;color:var(--text)">${esc(a.desc || '(senza nome)')}</span>
+      <div class="act-score-wrap">
+        <div class="score-col">
+          <span class="score-col-label">Stimato</span>
+          <div class="score-input-row">
+            <span style="font-size:24px;font-weight:700;font-family:'Lora',serif;color:var(--primary)">${a.stimato}</span>
+            <span class="score-denom">/100</span>
+          </div>
+        </div>
+        ${visHtml}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function renderPresentazione() {
