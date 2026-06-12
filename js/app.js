@@ -32,17 +32,20 @@ function createSession() {
   const copyPrev = document.getElementById('new-sess-copy').checked;
   const prevSess = activeSession();
   const sessId   = 'sess_' + uidAct();
+  const titolo   = (document.getElementById('new-sess-title')?.value || '').trim();
 
   const punteggi = patient.attivita.map(a => {
     const prev = copyPrev && prevSess
       ? prevSess.punteggi.find(p => p.attivita_id === a.id)
       : null;
     const nuovoStimato = prev ? (prev.vissuto !== null ? prev.vissuto : prev.stimato) : 0;
-    return { attivita_id: a.id, stimato: nuovoStimato, vissuto: null, sel: false };
+    const noteVP = copyPrev && prev ? (prev.noteVP || '') : '';
+    return { attivita_id: a.id, stimato: nuovoStimato, vissuto: null, sel: false, noteVP };
   });
 
-  patient.sessioni.push({ id: sessId, data: today(), locked: false, notePrivate: '', punteggi });
+  patient.sessioni.push({ id: sessId, data: today(), locked: false, notePrivate: '', titolo, noteVPGenerale: '', punteggi });
   currentSessionId = sessId;
+  if (document.getElementById('new-sess-title')) document.getElementById('new-sess-title').value = '';
 
   closeModal('modal-sessions');
   renderSessionSelector();
@@ -95,9 +98,9 @@ function saveNotes() {
 function addActivity() {
   if (activeSession()?.locked) return;
   const actId = uidAct();
-  patient.attivita.push({ id: actId, desc: '' });
+  patient.attivita.push({ id: actId, desc: '', target: null, archiviata: false });
   patient.sessioni.forEach(sess => {
-    sess.punteggi.push({ attivita_id: actId, stimato: 0, vissuto: null, sel: false });
+    sess.punteggi.push({ attivita_id: actId, stimato: 0, vissuto: null, sel: false, noteVP: '' });
   });
   renderActivities();
   syncVPBtn();
@@ -115,6 +118,156 @@ function deleteActivity(id) {
   renderActivities();
   syncVPBtn();
   autoSave();
+}
+
+function archiveActivity(id) {
+  if (activeSession()?.locked) return;
+  const a = patient.attivita.find(a => a.id === id);
+  if (a) { a.archiviata = true; renderActivities(); syncVPBtn(); autoSave(); toast('Attività archiviata.'); }
+}
+
+function unarchiveActivity(id) {
+  if (activeSession()?.locked) return;
+  const a = patient.attivita.find(a => a.id === id);
+  if (a) { a.archiviata = false; renderActivities(); syncVPBtn(); autoSave(); toast('Attività ripristinata.'); }
+}
+
+function toggleShowArchived() {
+  showArchived = !showArchived;
+  renderActivities();
+}
+
+function updateTarget(id, val) {
+  if (activeSession()?.locked) return;
+  const a = patient.attivita.find(a => a.id === id);
+  if (!a) return;
+  a.target = (val === '' || val === null) ? null : Math.max(0, Math.min(100, parseInt(val) || 0));
+  autoSave();
+}
+
+function updateSessionTitolo(id, val) {
+  const sess = patient.sessioni.find(s => s.id === id);
+  if (sess) sess.titolo = val;
+  renderSessionSelector();
+  autoSave();
+}
+
+function updateNoteVPGenerale(val) {
+  const sess = activeSession();
+  if (sess) sess.noteVPGenerale = val;
+  autoSave();
+}
+
+function updateNoteVP(actId, val) {
+  const p = punteggio(actId);
+  if (p) p.noteVP = val;
+  autoSave();
+}
+
+const TEMPLATES = [
+  {
+    id: 'fobia-sociale',
+    nome: 'Fobia sociale',
+    attivita: [
+      { desc: 'Salutare un vicino di casa', stimato: 10 },
+      { desc: 'Telefonare a un negozio per chiedere info', stimato: 20 },
+      { desc: 'Fare una domanda in classe o in riunione', stimato: 35 },
+      { desc: 'Mangiare in un ristorante affollato', stimato: 45 },
+      { desc: 'Parlare con uno sconosciuto', stimato: 55 },
+      { desc: 'Fare un acquisto e chiedere uno scontrino', stimato: 60 },
+      { desc: 'Partecipare a una festa con persone non conosciute', stimato: 70 },
+      { desc: 'Fare una presentazione davanti a un gruppo', stimato: 85 },
+    ],
+  },
+  {
+    id: 'ansia-prestazione',
+    nome: 'Ansia da prestazione',
+    attivita: [
+      { desc: 'Leggere un testo ad alta voce da soli', stimato: 10 },
+      { desc: 'Consegnare un compito scritto', stimato: 20 },
+      { desc: 'Rispondere a una domanda del docente in aula', stimato: 40 },
+      { desc: 'Sostenere un colloquio di lavoro simulato', stimato: 55 },
+      { desc: 'Sostenere un esame scritto', stimato: 65 },
+      { desc: 'Sostenere un esame orale', stimato: 75 },
+      { desc: 'Esibirsi davanti a un pubblico (recita, sport, ecc.)', stimato: 85 },
+    ],
+  },
+  {
+    id: 'agorafobia',
+    nome: 'Agorafobia',
+    attivita: [
+      { desc: 'Stare in casa da soli per 30 minuti', stimato: 10 },
+      { desc: 'Passeggiare vicino a casa', stimato: 20 },
+      { desc: 'Fare la spesa in un piccolo negozio', stimato: 35 },
+      { desc: 'Prendere l\'autobus per una fermata', stimato: 50 },
+      { desc: 'Stare in una sala d\'attesa affollata', stimato: 60 },
+      { desc: 'Visitare un centro commerciale', stimato: 70 },
+      { desc: 'Viaggiare in treno per più fermate', stimato: 80 },
+      { desc: 'Stare in una piazza o in un parco affollato', stimato: 85 },
+    ],
+  },
+];
+
+let _selectedTemplate = null;
+
+function openTemplatesModal() {
+  if (activeSession()?.locked) { toast('Sessione bloccata.', 'err'); return; }
+  _selectedTemplate = null;
+  const list = document.getElementById('template-list');
+  if (list) {
+    list.innerHTML = TEMPLATES.map(t => `
+      <div class="template-item" data-id="${t.id}" onclick="selectTemplate('${t.id}')">
+        <div class="template-item-name">${t.nome}</div>
+        <div class="template-item-preview">${t.attivita.map(a => a.desc).join(' · ')}</div>
+      </div>`).join('');
+  }
+  openModal('modal-templates');
+}
+
+function selectTemplate(id) {
+  _selectedTemplate = id;
+  document.querySelectorAll('.template-item').forEach(el => {
+    el.classList.toggle('template-selected', el.dataset.id === id);
+  });
+}
+
+function applyTemplate() {
+  if (!_selectedTemplate) { toast('Seleziona un template.', 'err'); return; }
+  const tpl = TEMPLATES.find(t => t.id === _selectedTemplate);
+  if (!tpl) return;
+  tpl.attivita.forEach(({ desc, stimato }) => {
+    const actId = uidAct();
+    patient.attivita.push({ id: actId, desc, target: null, archiviata: false });
+    patient.sessioni.forEach(sess => {
+      sess.punteggi.push({ attivita_id: actId, stimato, vissuto: null, sel: false, noteVP: '' });
+    });
+  });
+  closeModal('modal-templates');
+  renderActivities();
+  syncVPBtn();
+  autoSave();
+  toast(`Template "${tpl.nome}" aggiunto.`);
+}
+
+function exportCSV() {
+  const headers = ['Sessione', 'Titolo', 'Data', 'Attività', 'Stimato', 'Vissuto', 'Target'];
+  const rows = patient.sessioni.map((sess, si) =>
+    patient.attivita.map(act => {
+      const p = sess.punteggi.find(p => p.attivita_id === act.id);
+      return [si + 1, sess.titolo || '', sess.data, act.desc, p?.stimato ?? '', p?.vissuto ?? '', act.target ?? ''];
+    })
+  ).flat();
+  const csv = [headers, ...rows]
+    .map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `SUDS_${patient.cognome}_${patient.nome}_${patient.id}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV esportato.');
 }
 
 function updateDesc(id, val) {
@@ -180,6 +333,7 @@ function syncVPBtn() {
 
 function autoSave() {
   try { localStorage.setItem('suds_draft', JSON.stringify(patient)); } catch(e) {}
+  markUnsaved();
 }
 
 function saveJSON() {
@@ -195,6 +349,7 @@ async function saveToFileHandle(handle) {
     const writable = await handle.createWritable();
     await writable.write(JSON.stringify(patient, null, 2));
     await writable.close();
+    markSaved();
     syncSaveBtn();
     toast('File aggiornato correttamente.');
   } catch (err) {
@@ -230,6 +385,8 @@ async function exportJSON() {
   a.download = fileName;
   a.click();
   URL.revokeObjectURL(url);
+  markSaved();
+  syncSaveBtn();
   toast('Scheda scaricata come JSON.');
 }
 
@@ -285,8 +442,10 @@ function processImportedJSON(text) {
 
 function migrateV1toV2(data) {
   const attivita = (data.attivita || []).map(a => ({
-    id:   a.id   || uidAct(),
-    desc: a.desc || a.descrizione || ''
+    id:         a.id   || uidAct(),
+    desc:       a.desc || a.descrizione || '',
+    target:     a.target ?? null,
+    archiviata: a.archiviata ?? false,
   }));
   const sessId = 'sess_' + uidAct();
   return {
@@ -300,11 +459,14 @@ function migrateV1toV2(data) {
       data: today(),
       locked: false,
       notePrivate: '',
+      titolo: '',
+      noteVPGenerale: '',
       punteggi: (data.attivita || []).map((a, i) => ({
         attivita_id: attivita[i].id,
         stimato: a.score ?? a.punteggio ?? 0,
         vissuto: null,
-        sel: a.sel ?? a.selected ?? false
+        sel: a.sel ?? a.selected ?? false,
+        noteVP: '',
       }))
     }]
   };
@@ -327,8 +489,10 @@ function initFromHash() {
 
 function openSessionsModal() {
   renderSessionList();
-  const el = document.getElementById('new-sess-copy');
-  if (el) el.checked = false;
+  const copy = document.getElementById('new-sess-copy');
+  if (copy) copy.checked = false;
+  const title = document.getElementById('new-sess-title');
+  if (title) title.value = '';
   openModal('modal-sessions');
 }
 
@@ -353,21 +517,27 @@ function goHome() {
 document.addEventListener('DOMContentLoaded', () => {
   initFromHash();
   
-  // Try to load draft from localStorage
   try {
-    const draft = localStorage.getItem('suds_draft');
-    if (draft) {
-      patient = JSON.parse(draft);
-      currentSessionId = patient.sessioni[patient.sessioni.length - 1].id;
-      renderPatient();
-      showView('view-patient');
+    const raw = localStorage.getItem('suds_draft');
+    if (raw) {
+      const data    = JSON.parse(raw);
+      const last    = data.sessioni?.[data.sessioni.length - 1];
+      const dateStr = last ? ` del ${formatDate(last.data)}` : '';
+      if (confirm(`Trovata sessione non salvata di ${data.nome} ${data.cognome}${dateStr}.\nRipristinare?`)) {
+        patient           = data;
+        currentSessionId  = patient.sessioni[patient.sessioni.length - 1].id;
+        renderPatient();
+        showView('view-patient');
+      } else {
+        localStorage.removeItem('suds_draft');
+      }
     }
   } catch(e) {}
 });
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    ['modal-new', 'modal-sessions', 'modal-notes'].forEach(id => closeModal(id));
+    ['modal-new', 'modal-sessions', 'modal-notes', 'modal-templates'].forEach(id => closeModal(id));
     closePresentazione();
     closeVPView();
     closeProgressiView();

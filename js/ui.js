@@ -29,6 +29,18 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 
 const _hasFileAPI = typeof window.showSaveFilePicker === 'function';
 
+function markUnsaved() {
+  _unsaved = true;
+  const btn = document.getElementById('btn-save');
+  if (btn) btn.classList.add('has-changes');
+}
+
+function markSaved() {
+  _unsaved = false;
+  const btn = document.getElementById('btn-save');
+  if (btn) btn.classList.remove('has-changes');
+}
+
 function syncSaveBtn() {
   const btn = document.getElementById('btn-save');
   if (!btn) return;
@@ -42,6 +54,7 @@ function syncSaveBtn() {
     btn.innerHTML = '&#128190; Esporta JSON';
     btn.dataset.tooltip = 'Scegli dove salvare il file JSON';
   }
+  btn.classList.toggle('has-changes', _unsaved);
 }
 
 function renderPatient() {
@@ -57,9 +70,10 @@ function renderSessionSelector() {
   const select = document.getElementById('sess-select');
   if (!select) return;
   select.innerHTML = patient.sessioni.slice().reverse().map((s, i) => {
-    const n    = patient.sessioni.length - i;
-    const lock = s.locked ? ' 🔒' : '';
-    return `<option value="${s.id}" ${s.id === currentSessionId ? 'selected' : ''}>Sessione ${n} — ${formatDate(s.data)}${lock}</option>`;
+    const n     = patient.sessioni.length - i;
+    const lock  = s.locked ? ' 🔒' : '';
+    const title = s.titolo ? ` · ${s.titolo}` : '';
+    return `<option value="${s.id}" ${s.id === currentSessionId ? 'selected' : ''}>Sessione ${n} — ${formatDate(s.data)}${title}${lock}</option>`;
   }).join('');
 
   const sess      = activeSession();
@@ -106,8 +120,11 @@ function renderSessionList() {
     <div class="sess-item${isActive ? ' sess-active' : ''}"
          onclick="${isActive ? '' : `switchSessionModal('${s.id}')`}">
       <div class="sess-item-info">
-        <div class="sess-item-name">Sessione ${n}${s.locked ? ' 🔒' : ''}</div>
-        <div class="sess-item-date">${formatDate(s.data)}</div>
+        <div class="sess-item-name">Sessione ${n}${s.locked ? ' 🔒' : ''} <span class="sess-item-date">${formatDate(s.data)}</span></div>
+        <input class="sess-title-input" value="${esc(s.titolo || '')}"
+               placeholder="Aggiungi titolo..."
+               onclick="event.stopPropagation()"
+               onchange="updateSessionTitolo('${s.id}', this.value)">
       </div>
       ${canDelete
         ? `<button class="btn-del" onclick="deleteSession(event,'${s.id}')" title="Elimina">&#215;</button>`
@@ -116,14 +133,16 @@ function renderSessionList() {
   }).join('');
 }
 
-function sorted() {
+function sorted(includeArchived = false) {
   const sess = activeSession();
   if (!sess) return [];
-  return [...patient.attivita].sort((a, b) => {
-    const pa = sess.punteggi.find(p => p.attivita_id === a.id)?.stimato ?? 0;
-    const pb = sess.punteggi.find(p => p.attivita_id === b.id)?.stimato ?? 0;
-    return pa - pb;
-  });
+  return [...patient.attivita]
+    .filter(a => includeArchived || !a.archiviata)
+    .sort((a, b) => {
+      const pa = sess.punteggi.find(p => p.attivita_id === a.id)?.stimato ?? 0;
+      const pb = sess.punteggi.find(p => p.attivita_id === b.id)?.stimato ?? 0;
+      return pa - pb;
+    });
 }
 
 function vissutoClass(vissuto, stimato) {
@@ -133,66 +152,105 @@ function vissutoClass(vissuto, stimato) {
   return 'vissuto-same';
 }
 
+function actRowHTML(a, i, sess, locked, archived) {
+  const p       = sess?.punteggi.find(p => p.attivita_id === a.id);
+  const stimato = p?.stimato ?? 0;
+  const vissuto = p?.vissuto ?? null;
+  const target  = a.target ?? null;
+  const sel     = p?.sel ?? false;
+  const vc      = vissutoClass(vissuto, stimato);
+  const vissVal = vissuto !== null ? vissuto : '';
+  const targVal = target !== null ? target : '';
+  const ro      = locked ? 'readonly' : '';
+  const dis     = locked ? 'disabled' : '';
+
+  return `
+  <div class="act-row${sel ? ' is-selected' : ''}${locked ? ' is-locked' : ''}${archived ? ' is-archived' : ''}" data-id="${a.id}">
+    ${archived
+      ? '<span class="act-rank act-archived-label">📦</span>'
+      : `<input type="checkbox" class="act-check" ${sel ? 'checked' : ''}
+               onchange="toggleSel('${a.id}', this.checked)">`}
+    <span class="act-rank">${archived ? '' : i + 1}</span>
+    <input type="text" class="act-desc-input" value="${esc(a.desc)}"
+           placeholder="Descrivi l'attività..." ${archived ? 'readonly' : ro}
+           oninput="updateDesc('${a.id}', this.value)">
+    <div class="act-score-wrap">
+      <div class="score-col">
+        <span class="score-col-label">Stimato</span>
+        <div class="score-input-row">
+          <input type="number" class="act-score-input" value="${stimato}"
+                 min="0" max="100" ${archived ? 'readonly' : ro}
+                 oninput="updateStimato('${a.id}', this.value)"
+                 onblur="sortOnBlur()">
+          <span class="score-denom">/100</span>
+        </div>
+      </div>
+      <div class="score-col">
+        <span class="score-col-label">Vissuto</span>
+        <div class="score-input-row">
+          <input type="number" class="act-score-input vissuto-input ${vc}"
+                 value="${vissVal}" min="0" max="100" placeholder="—" ${archived ? 'readonly' : ro}
+                 oninput="updateVissuto('${a.id}', this.value)">
+          <span class="score-denom">/100</span>
+        </div>
+      </div>
+      <div class="score-col score-col-target">
+        <span class="score-col-label">Target</span>
+        <div class="score-input-row">
+          <input type="number" class="act-score-input target-input" value="${targVal}"
+                 min="0" max="100" placeholder="—" ${archived ? 'readonly' : ro}
+                 oninput="updateTarget('${a.id}', this.value)">
+          <span class="score-denom">/100</span>
+        </div>
+      </div>
+    </div>
+    ${archived
+      ? `<button class="btn-arch btn-unarch" onclick="unarchiveActivity('${a.id}')" title="Ripristina" ${dis}>&#8593;</button>`
+      : `<button class="btn-arch" onclick="archiveActivity('${a.id}')" title="Archivia" ${dis}>&#128451;</button>
+         <button class="btn-del" onclick="deleteActivity('${a.id}')" title="Elimina" ${dis}>&#215;</button>`}
+  </div>`;
+}
+
 function renderActivities() {
   const list  = document.getElementById('act-list');
   const empty = document.getElementById('act-empty');
-  const items = sorted();
   const sess  = activeSession();
   const locked = sess?.locked ?? false;
 
-  if (!items.length) {
+  const active   = sorted().filter(a => !a.archiviata);
+  const archived = patient?.attivita.filter(a => a.archiviata) ?? [];
+
+  if (!active.length && !archived.length) {
     if (list) list.style.display  = 'none';
     if (empty) empty.style.display = '';
+    updateArchivedToggle(archived.length);
     return;
   }
 
   if (list) list.style.display  = 'flex';
   if (empty) empty.style.display = 'none';
 
-  if (list) {
-    list.innerHTML = items.map((a, i) => {
-      const p       = sess?.punteggi.find(p => p.attivita_id === a.id);
-      const stimato = p?.stimato ?? 0;
-      const vissuto = p?.vissuto ?? null;
-      const sel     = p?.sel ?? false;
-      const vc      = vissutoClass(vissuto, stimato);
-      const vissVal = vissuto !== null ? vissuto : '';
-      const ro      = locked ? 'readonly' : '';
-      const dis     = locked ? 'disabled' : '';
+  let html = active.map((a, i) => actRowHTML(a, i, sess, locked, false)).join('');
 
-      return `
-      <div class="act-row${sel ? ' is-selected' : ''}${locked ? ' is-locked' : ''}" data-id="${a.id}">
-        <input type="checkbox" class="act-check" ${sel ? 'checked' : ''}
-               onchange="toggleSel('${a.id}', this.checked)">
-        <span class="act-rank">${i + 1}</span>
-        <input type="text" class="act-desc-input" value="${esc(a.desc)}"
-               placeholder="Descrivi l'attività..." ${ro}
-               oninput="updateDesc('${a.id}', this.value)">
-        <div class="act-score-wrap">
-          <div class="score-col">
-            <span class="score-col-label">Stimato</span>
-            <div class="score-input-row">
-              <input type="number" class="act-score-input" value="${stimato}"
-                     min="0" max="100" ${ro}
-                     oninput="updateStimato('${a.id}', this.value)"
-                     onblur="sortOnBlur()">
-              <span class="score-denom">/100</span>
-            </div>
-          </div>
-          <div class="score-col">
-            <span class="score-col-label">Vissuto</span>
-            <div class="score-input-row">
-              <input type="number" class="act-score-input vissuto-input ${vc}"
-                     value="${vissVal}" min="0" max="100" placeholder="—" ${ro}
-                     oninput="updateVissuto('${a.id}', this.value)">
-              <span class="score-denom">/100</span>
-            </div>
-          </div>
-        </div>
-        <button class="btn-del" onclick="deleteActivity('${a.id}')" title="Elimina" ${dis}>&#215;</button>
-      </div>`;
-    }).join('');
+  if (archived.length) {
+    html += `<div class="archived-separator">
+      <button class="btn-arch-toggle" onclick="toggleShowArchived()">
+        ${showArchived ? '&#9650;' : '&#9660;'} Archivio (${archived.length})
+      </button>
+    </div>`;
+    if (showArchived) {
+      html += archived.map(a => actRowHTML(a, 0, sess, locked, true)).join('');
+    }
   }
+
+  if (list) list.innerHTML = html;
+  updateArchivedToggle(archived.length);
+}
+
+function updateArchivedToggle(count) {
+  const btn = document.getElementById('btn-archived-toggle');
+  if (!btn) return;
+  btn.style.display = count ? '' : 'none';
 }
 
 function openProgressiView() {
@@ -219,46 +277,65 @@ function renderChart() {
   const labels   = patient.sessioni.map((s, i) => `S${i + 1} — ${formatDate(s.data)}`);
   const datasets = [];
 
-  patient.attivita.forEach((act, i) => {
+  patient.attivita.filter(a => !a.archiviata).forEach((act, i) => {
     const color  = CHART_COLORS[i % CHART_COLORS.length];
     const hidden = i >= 5;
 
     datasets.push({
-      label:          act.desc || '(senza nome)',
-      isVissuto:      false,
-      actIndex:       i,
-      data:           patient.sessioni.map(s => {
+      label:           act.desc || '(senza nome)',
+      isVissuto:       false,
+      isTarget:        false,
+      actIndex:        i,
+      data:            patient.sessioni.map(s => {
         const p = s.punteggi.find(p => p.attivita_id === act.id);
         return p !== undefined ? p.stimato : null;
       }),
-      borderColor:    color,
+      borderColor:     color,
       backgroundColor: color + '18',
-      tension:        0.3,
-      pointRadius:    5,
+      tension:         0.3,
+      pointRadius:     5,
       pointHoverRadius: 7,
-      borderWidth:    2,
+      borderWidth:     2,
       hidden,
-      spanGaps:       false,
+      spanGaps:        false,
     });
 
     datasets.push({
-      label:          act.desc || '(senza nome)',
-      isVissuto:      true,
-      actIndex:       i,
-      data:           patient.sessioni.map(s => {
+      label:           act.desc || '(senza nome)',
+      isVissuto:       true,
+      isTarget:        false,
+      actIndex:        i,
+      data:            patient.sessioni.map(s => {
         const p = s.punteggi.find(p => p.attivita_id === act.id);
         return (p && p.vissuto !== null) ? p.vissuto : null;
       }),
-      borderColor:    color,
+      borderColor:     color,
       backgroundColor: 'transparent',
-      borderDash:     [6, 4],
-      tension:        0.3,
-      pointRadius:    4,
+      borderDash:      [6, 4],
+      tension:         0.3,
+      pointRadius:     4,
       pointHoverRadius: 6,
-      borderWidth:    1.5,
+      borderWidth:     1.5,
       hidden,
-      spanGaps:       false,
+      spanGaps:        false,
     });
+
+    if (act.target !== null && act.target !== undefined) {
+      datasets.push({
+        label:           act.desc || '(senza nome)',
+        isVissuto:       false,
+        isTarget:        true,
+        actIndex:        i,
+        data:            patient.sessioni.map(() => act.target),
+        borderColor:     color,
+        backgroundColor: 'transparent',
+        borderDash:      [2, 5],
+        borderWidth:     1,
+        pointRadius:     0,
+        hidden,
+        spanGaps:        true,
+      });
+    }
   });
 
   chartInstance = new Chart(ctx, {
@@ -283,7 +360,7 @@ function renderChart() {
       plugins: {
         legend: {
           labels: {
-            filter:        (item, data) => !data.datasets[item.datasetIndex].isVissuto,
+            filter:        (item, data) => !data.datasets[item.datasetIndex].isVissuto && !data.datasets[item.datasetIndex].isTarget,
             color:         '#253238',
             usePointStyle: true,
             padding:       16,
@@ -292,8 +369,8 @@ function renderChart() {
             const chart    = legend.chart;
             const actIndex = chart.data.datasets[legendItem.datasetIndex].actIndex;
             const isHidden = chart.getDatasetMeta(legendItem.datasetIndex).hidden ?? false;
-            chart.data.datasets.forEach((ds, i) => {
-              if (ds.actIndex === actIndex) chart.getDatasetMeta(i).hidden = !isHidden;
+            chart.data.datasets.forEach((ds, idx) => {
+              if (ds.actIndex === actIndex) chart.getDatasetMeta(idx).hidden = !isHidden;
             });
             chart.update();
           },
@@ -303,7 +380,7 @@ function renderChart() {
             label: ctx => {
               const val = ctx.parsed.y;
               if (val === null || val === undefined) return null;
-              const type = ctx.dataset.isVissuto ? 'Vissuto' : 'Stimato';
+              const type = ctx.dataset.isTarget ? 'Target' : ctx.dataset.isVissuto ? 'Vissuto' : 'Stimato';
               return `  ${ctx.dataset.label} — ${type}: ${val}`;
             },
           },

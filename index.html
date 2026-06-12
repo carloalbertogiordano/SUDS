@@ -64,7 +64,9 @@
       <button class="btn btn-outline btn-sm" id="btn-delete-session" onclick="deleteCurrentSession()" data-tooltip="Elimina definitivamente questa sessione">&#128465; Elimina</button>
       <button class="btn btn-outline btn-sm" onclick="openNotesModal()" data-tooltip="Note private di sessione (non appaiono nel PDF)">&#128221; Note</button>
       <button class="btn btn-outline btn-sm" onclick="openProgressiView()" data-tooltip="Grafico andamento punteggi nel tempo">&#128200; Progressi</button>
-      <button class="btn btn-outline btn-sm" onclick="openPresentazione()" data-tooltip="Modalità presentazione a schermo intero (tasto F)">&#9974; Presenta</button>
+      <button class="btn btn-outline btn-sm" onclick="openPresentazione()" data-tooltip="Modalità presentazione a schermo intero — tasto F">&#9974; Presenta <kbd>F</kbd></button>
+      <button class="btn btn-outline btn-sm" onclick="exportCSV()" data-tooltip="Esporta tutti i dati delle sessioni in CSV">&#128196; CSV</button>
+      <button class="btn btn-outline btn-sm" onclick="openTemplatesModal()" data-tooltip="Carica una gerarchia di attività predefinita">&#128196; Template</button>
     </div>
   </header>
 
@@ -75,6 +77,8 @@
     </div>
 
     <div class="act-list" id="act-list"></div>
+
+    <div class="kbd-hint">Tasti: <kbd>F</kbd> presentazione &nbsp;·&nbsp; <kbd>Esc</kbd> chiudi</div>
 
     <div class="empty" id="act-empty" style="display:none">
       <div class="empty-icon">📋</div>
@@ -113,6 +117,10 @@
 
     <div class="new-sess-section">
       <div class="new-sess-title">Nuova sessione</div>
+      <div class="field" style="margin-bottom:10px">
+        <input id="new-sess-title" class="field-input" type="text"
+               placeholder="Titolo opzionale (es. Prima EMDR, Dopo vacanze)" autocomplete="off">
+      </div>
       <label class="checkbox-row">
         <input type="checkbox" id="new-sess-copy">
         Copia punteggi dalla sessione precedente (vissuto diventa stimato)
@@ -151,7 +159,8 @@
     <div class="field">
       <label class="field-label">Commento generale</label>
       <textarea id="vp-general" class="field-textarea" style="min-height:100px"
-        placeholder="Note introduttive, indicazioni generali per questa sessione..."></textarea>
+        placeholder="Note introduttive, indicazioni generali per questa sessione..."
+        oninput="updateNoteVPGenerale(this.value)"></textarea>
     </div>
     <hr class="vp-divider">
     <div class="vp-sec-label">Attività selezionate &mdash; ordinate per punteggio crescente</div>
@@ -215,6 +224,19 @@
       <span class="sec-label">Attività</span>
     </div>
     <div class="act-list" id="qr-act-list"></div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: Template ==================== -->
+<div id="modal-templates" class="overlay">
+  <div class="modal modal-xl">
+    <div class="modal-title">&#128196; Template gerarchia</div>
+    <div class="modal-sub">Seleziona un template per aggiungere attività predefinite alla scheda attuale.</div>
+    <div class="template-list" id="template-list"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-templates')">Annulla</button>
+      <button class="btn btn-primary" onclick="applyTemplate()">Aggiungi attività</button>
+    </div>
   </div>
 </div>
 

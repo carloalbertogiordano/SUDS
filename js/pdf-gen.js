@@ -24,7 +24,7 @@ function openVPView() {
   if (!selActs.length) { toast('Seleziona almeno un\'attività.', 'err'); return; }
 
   document.getElementById('vp-patient-name').textContent = `${patient.nome} ${patient.cognome}`;
-  document.getElementById('vp-general').value = '';
+  document.getElementById('vp-general').value = sess?.noteVPGenerale || '';
   const genBtn = document.getElementById('vp-genera-btn');
   genBtn.disabled    = false;
   genBtn.textContent = 'Genera PDF';
@@ -33,6 +33,7 @@ function openVPView() {
 
   document.getElementById('vp-acts').innerHTML = selActs.map(a => {
     const p = sess.punteggi.find(p => p.attivita_id === a.id);
+    const savedNote = p?.noteVP || '';
     return `
     <div class="vp-act-card">
       <div class="vp-act-top">
@@ -42,7 +43,8 @@ function openVPView() {
       <label class="vp-note-label">Nota per questa attività</label>
       <textarea class="field-textarea" data-id="${a.id}"
                 placeholder="Inserisci una nota specifica..."
-                style="min-height:80px"></textarea>
+                style="min-height:80px"
+                oninput="updateNoteVP('${a.id}', this.value)">${esc(savedNote)}</textarea>
     </div>`;
   }).join('');
 
