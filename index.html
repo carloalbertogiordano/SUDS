@@ -171,14 +171,14 @@
     <div id="vp-acts"></div>
   </div>
   <div id="vp-result-bar" class="vp-result-bar" style="display:none">
-    <div id="vp-qr-on-screen" style="display:none; margin-right:auto;">
+    <!-- QR on-screen hidden while share buttons are disabled -->
+    <!-- <div id="vp-qr-on-screen" style="display:none; margin-right:auto;">
       <canvas id="qr-canvas-screen" style="width:60px; height:60px; cursor:zoom-in;" onclick="toggleQRSize()"></canvas>
-    </div>
+    </div> -->
     <span class="vp-result-status">&#10003; PDF pronto</span>
-    <button class="btn btn-outline" id="vp-wa-btn" onclick="shareViaWhatsApp()"
-            data-tooltip="Condividi via WhatsApp (PDF su mobile, link su desktop)">&#128172; WhatsApp</button>
-    <button class="btn btn-outline" id="vp-tg-btn" onclick="shareViaTelegram()"
-            data-tooltip="Condividi via Telegram (PDF su mobile, link su desktop)">&#9992; Telegram</button>
+    <!-- share buttons temporarily disabled — TODO: revisit after mobile testing -->
+    <!-- <button class="btn btn-outline" id="vp-wa-btn" onclick="shareViaWhatsApp()">&#128172; WhatsApp</button> -->
+    <!-- <button class="btn btn-outline" id="vp-tg-btn" onclick="shareViaTelegram()">&#9992; Telegram</button> -->
     <button class="btn btn-primary" id="vp-download-btn" onclick="downloadPDF()"
             data-tooltip="Scarica il PDF sul dispositivo">&#8681; Scarica PDF</button>
   </div>
