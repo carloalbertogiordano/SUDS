@@ -20,7 +20,7 @@
 - [x] **Export CSV** — esportare tutte le sessioni in CSV per analisi esterna (Excel, SPSS)
 - [x] **PWA installabile** — `manifest.json` + service worker + icone SVG; funziona offline per asset locali
 - [x] **Condivisione PDF diretta (no link)** — rimosso Email (mailto non supporta allegati); WhatsApp e Telegram auto-generano il PDF e usano `navigator.share({ files })` su mobile (picker OS nativo), fallback link su desktop. Da verificare comportamento su iOS/Android reali.
-- [ ] **⚠️ Condivisione su desktop** — su desktop `navigator.share` non esiste: nessun browser lo supporta. Unica alternativa reale è download + incolla manuale. Valutare se mostrare un messaggio esplicativo su desktop invece dei bottoni WA/TG.
-- [ ] **⚠️ PDF in QR: non fattibile** — QR max ~3KB, PDF tipicamente 50–300KB. Non è possibile embeddare il file. Alternativa: QR → URL di un PDF hostato (richiede backend/storage). Se si vuole condivisione offline del PDF, unica via è `navigator.share` su mobile o download.
-- [ ] **Switch di lingua IT/EN** — tutte le stringhe UI in un oggetto `STRINGS[lang]`; rilevamento automatico lingua browser (`navigator.language`), se non `it` carica inglese; toggle manuale in home per override. Includere: UI terapeuta, vista paziente, PDF generato, toast, confirm dialog.
+- [x] ~~**⚠️ Condivisione su desktop**~~ — won't fix: `navigator.share` non supportato su nessun browser desktop. Strategia adottata: solo download PDF.
+- [x] ~~**⚠️ PDF in QR: non fattibile**~~ — won't fix: QR max ~3KB, PDF tipicamente 50–300KB. Non embeddabile. Strategia adottata: solo download PDF.
+- [x] **Switch di lingua IT/EN** — `STRINGS[lang]` con auto-detect `navigator.language`, toggle in home, persistenza localStorage. Copre: UI terapeuta, vista paziente, PDF, toast, confirm, template.
 - [x] **Bottone "Problemi? Serve una mano?"** — link discreto in home, punta a `SUPPORT.md` su GitHub; `SUPPORT.md` con guida italiana per non-tecnici; template issue GitHub per bug e feature request

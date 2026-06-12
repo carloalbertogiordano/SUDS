@@ -10,7 +10,7 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#5B8E9F">
   <link rel="apple-touch-icon" href="icons/icon.svg">
-  
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
@@ -23,26 +23,26 @@
   <div class="home-wrap">
     <div class="home-brand">
       <div class="home-acronym">SUDS</div>
-      <div class="home-tagline">Scala di Disagio Soggettivo &mdash; Gestione schede pazienti</div>
-      <div class="home-author">Sviluppata da Joseph Wolpe, anni '50</div>
+      <div class="home-tagline" data-i18n="home.tagline">Scala di Disagio Soggettivo &mdash; Gestione schede pazienti</div>
+      <div class="home-author" data-i18n="home.author">Sviluppata da Joseph Wolpe, anni '50</div>
     </div>
     <div class="home-cards">
       <div class="home-card" onclick="openNewPatientModal()">
         <div class="home-card-icon">👤</div>
-        <div class="home-card-title">Nuovo paziente</div>
-        <div class="home-card-desc">Crea una nuova scheda</div>
+        <div class="home-card-title" data-i18n="home.new-patient">Nuovo paziente</div>
+        <div class="home-card-desc" data-i18n="home.new-patient-desc">Crea una nuova scheda</div>
       </div>
       <div class="home-card" onclick="triggerImport()">
         <div class="home-card-icon">📂</div>
-        <div class="home-card-title">Carica scheda</div>
-        <div class="home-card-desc">Importa un file JSON</div>
+        <div class="home-card-title" data-i18n="home.load">Carica scheda</div>
+        <div class="home-card-desc" data-i18n="home.load-desc">Importa un file JSON</div>
       </div>
     </div>
     <a class="home-support-link"
        href="https://github.com/carloalbertogiordano/SUDS/blob/main/SUPPORT.md"
-       target="_blank" rel="noopener">
-      Problemi? Serve una mano?
-    </a>
+       target="_blank" rel="noopener"
+       data-i18n="home.support">Problemi? Serve una mano?</a>
+    <button id="btn-lang" class="btn-lang" onclick="toggleLang()">English</button>
   </div>
   <input type="file" id="file-import" accept=".json" style="display:none" onchange="onFileImport(event)">
 </div>
@@ -52,46 +52,62 @@
 
   <header class="patient-bar">
     <div class="patient-bar-top">
-      <button class="btn-back" onclick="goHome()" data-tooltip="Torna alla home">&#8592; Indietro</button>
+      <button class="btn-back" onclick="goHome()"
+              data-i18n="bar.back"
+              data-i18n-tooltip="bar.back">← Indietro</button>
       <div class="patient-meta">
         <div class="patient-fullname" id="pt-name"></div>
         <div class="patient-code" id="pt-code"></div>
       </div>
       <div class="bar-actions">
         <button id="btn-save" class="btn btn-outline" onclick="saveJSON()">&#128190; Salva</button>
-        <button class="btn btn-cta" id="btn-vp" onclick="openVPView()" disabled data-tooltip="Genera PDF con le attività selezionate">&#9654; Voglio provare</button>
+        <button class="btn btn-cta" id="btn-vp" onclick="openVPView()" disabled
+                data-i18n="bar.vp">&#9654; Voglio provare</button>
       </div>
     </div>
 
     <div class="patient-bar-sessions">
-      <select id="sess-select" class="sess-select" onchange="switchSession(this.value)" data-tooltip="Sessione attiva — clicca per cambiare"></select>
-      <button class="btn btn-outline btn-sm" onclick="openSessionsModal()" data-tooltip="Gestisci sessioni o creane una nuova">+ Sessione</button>
-      <button class="btn btn-outline btn-sm" id="btn-lock" onclick="lockSession()" data-tooltip="Blocca la sessione (dati non più modificabili)">&#128274; Blocca</button>
-      <span class="badge-locked" id="badge-locked" style="display:none">&#128274; Sessione bloccata</span>
-      <button class="btn btn-outline btn-sm" id="btn-unlock" style="display:none" onclick="unlockSession()" data-tooltip="Sblocca la sessione per modificarla di nuovo">&#128275; Sblocca</button>
-      <button class="btn btn-outline btn-sm" id="btn-delete-session" onclick="deleteCurrentSession()" data-tooltip="Elimina definitivamente questa sessione">&#128465; Elimina</button>
-      <button class="btn btn-outline btn-sm" onclick="openNotesModal()" data-tooltip="Note private di sessione (non appaiono nel PDF)">&#128221; Note</button>
-      <button class="btn btn-outline btn-sm" onclick="openCompareModal()" data-tooltip="Confronto affiancato di due sessioni">&#9878; Confronta</button>
-      <button class="btn btn-outline btn-sm" onclick="openProgressiView()" data-tooltip="Grafico andamento punteggi nel tempo">&#128200; Progressi</button>
-      <button class="btn btn-outline btn-sm" onclick="openPresentazione()" data-tooltip="Modalità presentazione a schermo intero — tasto F">&#9974; Presenta <kbd>F</kbd></button>
-      <button class="btn btn-outline btn-sm" onclick="exportCSV()" data-tooltip="Esporta tutti i dati delle sessioni in CSV">&#128196; CSV</button>
-      <button class="btn btn-outline btn-sm" onclick="openTemplatesModal()" data-tooltip="Carica una gerarchia di attività predefinita">&#128196; Template</button>
+      <select id="sess-select" class="sess-select" onchange="switchSession(this.value)"></select>
+      <button class="btn btn-outline btn-sm" onclick="openSessionsModal()"
+              data-i18n="bar.new-session">+ Sessione</button>
+      <button class="btn btn-outline btn-sm" id="btn-lock" onclick="lockSession()"
+              data-i18n="bar.lock">&#128274; Blocca</button>
+      <span class="badge-locked" id="badge-locked" style="display:none"
+            data-i18n="bar.locked-badge">&#128274; Sessione bloccata</span>
+      <button class="btn btn-outline btn-sm" id="btn-unlock" style="display:none" onclick="unlockSession()"
+              data-i18n="bar.unlock">&#128275; Sblocca</button>
+      <button class="btn btn-outline btn-sm" id="btn-delete-session" onclick="deleteCurrentSession()"
+              data-i18n="bar.delete-session">&#128465; Elimina</button>
+      <button class="btn btn-outline btn-sm" onclick="openNotesModal()"
+              data-i18n="bar.notes">&#128221; Note</button>
+      <button class="btn btn-outline btn-sm" onclick="openCompareModal()"
+              data-i18n="bar.compare">&#8966; Confronta</button>
+      <button class="btn btn-outline btn-sm" onclick="openProgressiView()"
+              data-i18n="bar.progress">&#128200; Progressi</button>
+      <button class="btn btn-outline btn-sm" onclick="openPresentazione()">
+        <span data-i18n="bar.presenta">⛶ Presenta</span> <kbd>F</kbd>
+      </button>
+      <button class="btn btn-outline btn-sm" onclick="exportCSV()"
+              data-i18n="bar.csv">&#128196; CSV</button>
+      <button class="btn btn-outline btn-sm" onclick="openTemplatesModal()"
+              data-i18n="bar.templates">&#128196; Template</button>
     </div>
   </header>
 
   <div class="patient-body">
     <div class="sec-head">
-      <span class="sec-label">Attività e punteggi SUDS</span>
-      <button class="btn btn-primary btn-sm" id="btn-add-act" onclick="addActivity()" data-tooltip="Aggiunge una nuova attività alla gerarchia">+ Aggiungi attività</button>
+      <span class="sec-label" data-i18n="act.section-label">Attività e punteggi SUDS</span>
+      <button class="btn btn-primary btn-sm" id="btn-add-act" onclick="addActivity()"
+              data-i18n="act.add">+ Aggiungi attività</button>
     </div>
 
     <div class="act-list" id="act-list"></div>
 
-    <div class="kbd-hint">Tasti: <kbd>F</kbd> presentazione &nbsp;·&nbsp; <kbd>Esc</kbd> chiudi</div>
+    <div class="kbd-hint" data-i18n="kbd.hint">Tasti: <kbd>F</kbd> presentazione &nbsp;·&nbsp; <kbd>Esc</kbd> chiudi</div>
 
     <div class="empty" id="act-empty" style="display:none">
       <div class="empty-icon">📋</div>
-      <div class="empty-text">Nessuna attività ancora.<br>Clicca <strong>Aggiungi attività</strong> per iniziare.</div>
+      <div class="empty-text" data-i18n="act.empty">Nessuna attività ancora.<br>Clicca <strong>Aggiungi attività</strong> per iniziare.</div>
     </div>
   </div>
 </div>
@@ -99,19 +115,25 @@
 <!-- ==================== MODAL: Nuovo paziente ==================== -->
 <div id="modal-new" class="overlay">
   <div class="modal">
-    <div class="modal-title">Nuovo paziente</div>
-    <div class="modal-sub">Inserisci nome e cognome. Il codice identificativo viene generato in automatico.</div>
+    <div class="modal-title" data-i18n="modal.new-patient.title">Nuovo paziente</div>
+    <div class="modal-sub" data-i18n="modal.new-patient.sub">Inserisci nome e cognome. Il codice identificativo viene generato in automatico.</div>
     <div class="field">
-      <label class="field-label" for="in-nome">Nome</label>
-      <input id="in-nome" class="field-input" type="text" placeholder="es. Mario" autocomplete="off">
+      <label class="field-label" for="in-nome" data-i18n="modal.new-patient.nome">Nome</label>
+      <input id="in-nome" class="field-input" type="text"
+             data-i18n-placeholder="modal.new-patient.nome-ph"
+             placeholder="es. Mario" autocomplete="off">
     </div>
     <div class="field">
-      <label class="field-label" for="in-cognome">Cognome</label>
-      <input id="in-cognome" class="field-input" type="text" placeholder="es. Rossi" autocomplete="off">
+      <label class="field-label" for="in-cognome" data-i18n="modal.new-patient.cognome">Cognome</label>
+      <input id="in-cognome" class="field-input" type="text"
+             data-i18n-placeholder="modal.new-patient.cognome-ph"
+             placeholder="es. Rossi" autocomplete="off">
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-new')">Annulla</button>
-      <button class="btn btn-primary" onclick="createPatient()">Crea scheda</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-new')"
+              data-i18n="modal.cancel">Annulla</button>
+      <button class="btn btn-primary" onclick="createPatient()"
+              data-i18n="modal.new-patient.create">Crea scheda</button>
     </div>
   </div>
 </div>
@@ -119,26 +141,29 @@
 <!-- ==================== MODAL: Sessioni ==================== -->
 <div id="modal-sessions" class="overlay">
   <div class="modal modal-xl">
-    <div class="modal-title">Sessioni</div>
-    <div class="modal-sub">Seleziona la sessione attiva o creane una nuova.</div>
+    <div class="modal-title" data-i18n="modal.sessions.title">Sessioni</div>
+    <div class="modal-sub" data-i18n="modal.sessions.sub">Seleziona la sessione attiva o creane una nuova.</div>
 
     <div class="sess-list" id="sess-list"></div>
 
     <div class="new-sess-section">
-      <div class="new-sess-title">Nuova sessione</div>
+      <div class="new-sess-title" data-i18n="modal.sessions.new-title">Nuova sessione</div>
       <div class="field" style="margin-bottom:10px">
         <input id="new-sess-title" class="field-input" type="text"
+               data-i18n-placeholder="modal.sessions.title-ph"
                placeholder="Titolo opzionale (es. Prima EMDR, Dopo vacanze)" autocomplete="off">
       </div>
       <label class="checkbox-row">
         <input type="checkbox" id="new-sess-copy">
-        Copia punteggi dalla sessione precedente (vissuto diventa stimato)
+        <span data-i18n="modal.sessions.copy">Copia punteggi dalla sessione precedente (vissuto diventa stimato)</span>
       </label>
     </div>
 
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-sessions')">Chiudi</button>
-      <button class="btn btn-primary" onclick="createSession()">Crea sessione</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-sessions')"
+              data-i18n="modal.sessions.close">Chiudi</button>
+      <button class="btn btn-primary" onclick="createSession()"
+              data-i18n="modal.sessions.create">Crea sessione</button>
     </div>
   </div>
 </div>
@@ -146,13 +171,16 @@
 <!-- ==================== MODAL: Note private ==================== -->
 <div id="modal-notes" class="overlay">
   <div class="modal">
-    <div class="modal-title">&#128221; Note private</div>
-    <div class="modal-sub">Queste note non appaiono nel PDF.</div>
+    <div class="modal-title" data-i18n="modal.notes.title">&#128221; Note private</div>
+    <div class="modal-sub" data-i18n="modal.notes.sub">Queste note non appaiono nel PDF.</div>
     <textarea id="notes-textarea" class="field-textarea" style="min-height:160px"
+              data-i18n-placeholder="modal.notes.ph"
               placeholder="Note di sessione..."></textarea>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-notes')">Annulla</button>
-      <button class="btn btn-primary" onclick="saveNotes()">Salva</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-notes')"
+              data-i18n="modal.cancel">Annulla</button>
+      <button class="btn btn-primary" onclick="saveNotes()"
+              data-i18n="modal.notes.save">Salva</button>
     </div>
   </div>
 </div>
@@ -160,47 +188,48 @@
 <!-- ==================== VIEW: Voglio Provare ==================== -->
 <div id="view-vp">
   <div class="vp-header">
-    <button class="btn-back" onclick="closeVPView()">&#8592; Indietro</button>
-    <div class="vp-header-title">&#9654; Voglio Provare &mdash; <span id="vp-patient-name"></span></div>
+    <button class="btn-back" onclick="closeVPView()" data-i18n="bar.back">&#8592; Indietro</button>
+    <div class="vp-header-title">
+      <span data-i18n="vp.title-prefix">&#9654; Voglio Provare &mdash;</span>
+      <span id="vp-patient-name"></span>
+    </div>
     <button class="btn btn-cta" id="vp-genera-btn" onclick="preparePDF()">Genera PDF</button>
   </div>
   <div class="vp-body">
     <div class="field">
-      <label class="field-label">Commento generale</label>
+      <label class="field-label" data-i18n="vp.general-label">Commento generale</label>
       <textarea id="vp-general" class="field-textarea" style="min-height:100px"
+        data-i18n-placeholder="vp.general-ph"
         placeholder="Note introduttive, indicazioni generali per questa sessione..."
         oninput="updateNoteVPGenerale(this.value)"></textarea>
     </div>
     <hr class="vp-divider">
-    <div class="vp-sec-label">Attività selezionate &mdash; ordinate per punteggio crescente</div>
+    <div class="vp-sec-label" data-i18n="vp.acts-label">Attività selezionate &mdash; ordinate per punteggio crescente</div>
     <div id="vp-acts"></div>
   </div>
   <div id="vp-result-bar" class="vp-result-bar" style="display:none">
-    <!-- QR on-screen hidden while share buttons are disabled -->
-    <!-- <div id="vp-qr-on-screen" style="display:none; margin-right:auto;">
-      <canvas id="qr-canvas-screen" style="width:60px; height:60px; cursor:zoom-in;" onclick="toggleQRSize()"></canvas>
-    </div> -->
-    <span class="vp-result-status">&#10003; PDF pronto</span>
-    <!-- share buttons temporarily disabled — TODO: revisit after mobile testing -->
-    <!-- <button class="btn btn-outline" id="vp-wa-btn" onclick="shareViaWhatsApp()">&#128172; WhatsApp</button> -->
-    <!-- <button class="btn btn-outline" id="vp-tg-btn" onclick="shareViaTelegram()">&#9992; Telegram</button> -->
+    <span class="vp-result-status" data-i18n="vp.ready">&#10003; PDF pronto</span>
     <button class="btn btn-primary" id="vp-download-btn" onclick="downloadPDF()"
-            data-tooltip="Scarica il PDF sul dispositivo">&#8681; Scarica PDF</button>
+            data-i18n="vp.download">&#8681; Scarica PDF</button>
   </div>
 </div>
 
 <!-- ==================== VIEW: Progressi ==================== -->
 <div id="view-progressi">
   <div class="progressi-header">
-    <button class="btn-back" onclick="closeProgressiView()">&#8592; Indietro</button>
-    <div class="progressi-header-title">&#128200; Progressi &mdash; <span id="progressi-patient-name"></span></div>
+    <button class="btn-back" onclick="closeProgressiView()" data-i18n="bar.back">&#8592; Indietro</button>
+    <div class="progressi-header-title">
+      <span data-i18n="prog.title-prefix">&#128200; Progressi &mdash;</span>
+      <span id="progressi-patient-name"></span>
+    </div>
   </div>
   <div class="progressi-body">
-    <div class="modal-sub" style="margin-bottom:24px">Andamento dei punteggi SUDS nelle sessioni. Linea continua = stimato, tratteggiata = vissuto.</div>
+    <div class="modal-sub" style="margin-bottom:24px"
+         data-i18n="prog.sub">Andamento dei punteggi SUDS nelle sessioni. Linea continua = stimato, tratteggiata = vissuto.</div>
     <div class="progressi-chart-container">
       <canvas id="chart-canvas"></canvas>
     </div>
-    <p class="chart-hint">Clicca sulla legenda per mostrare/nascondere singole attività.</p>
+    <p class="chart-hint" data-i18n="prog.hint">Clicca sulla legenda per mostrare/nascondere singole attività.</p>
   </div>
 </div>
 
@@ -209,7 +238,8 @@
   <div class="presenta-header">
     <span class="presenta-patient" id="presenta-patient"></span>
     <button class="btn-presenta-reset" id="presenta-reset" onclick="resetPresentaToggle()"></button>
-    <button class="btn-presenta-close" onclick="closePresentazione()">&#215; Chiudi</button>
+    <button class="btn-presenta-close" onclick="closePresentazione()"
+            data-i18n="presenta.close">&#215; Chiudi</button>
   </div>
   <div class="presenta-body" id="presenta-body"></div>
 </div>
@@ -218,14 +248,15 @@
 <div id="view-qr-read" class="view">
   <div class="qr-page">
     <div class="qr-page-header">
-      <div class="qr-page-brand">Voglio Provare</div>
+      <div class="qr-page-brand" data-i18n="qr.brand">Voglio Provare</div>
       <div class="qr-page-name" id="qr-patient-name"></div>
       <div class="qr-page-date" id="qr-session-date"></div>
     </div>
     <p class="qr-note-generale" id="qr-note-generale" style="display:none"></p>
     <div class="qr-act-list" id="qr-act-list"></div>
     <div class="qr-page-footer">
-      <button class="btn btn-outline" onclick="window.print()">&#128424; Stampa</button>
+      <button class="btn btn-outline" onclick="window.print()"
+              data-i18n="qr.print">&#128424; Stampa</button>
     </div>
   </div>
 </div>
@@ -233,15 +264,16 @@
 <!-- ==================== MODAL: Confronto sessioni ==================== -->
 <div id="modal-compare" class="overlay">
   <div class="modal modal-xl">
-    <div class="modal-title">&#9878; Confronto sessioni</div>
-    <div class="modal-sub">Seleziona due sessioni per confrontare i punteggi SUDS.</div>
+    <div class="modal-title" data-i18n="modal.compare.title">&#9878; Confronto sessioni</div>
+    <div class="modal-sub" data-i18n="modal.compare.sub">Seleziona due sessioni per confrontare i punteggi SUDS.</div>
     <div class="compare-selectors">
       <select id="compare-sess-a" class="sess-select" onchange="renderCompareTable()"></select>
       <select id="compare-sess-b" class="sess-select" onchange="renderCompareTable()"></select>
     </div>
     <div id="compare-table-wrap"></div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-compare')">Chiudi</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-compare')"
+              data-i18n="modal.compare.close">Chiudi</button>
     </div>
   </div>
 </div>
@@ -249,12 +281,14 @@
 <!-- ==================== MODAL: Template ==================== -->
 <div id="modal-templates" class="overlay">
   <div class="modal modal-xl">
-    <div class="modal-title">&#128196; Template gerarchia</div>
-    <div class="modal-sub">Seleziona un template per aggiungere attività predefinite alla scheda attuale.</div>
+    <div class="modal-title" data-i18n="modal.templates.title">&#128196; Template gerarchia</div>
+    <div class="modal-sub" data-i18n="modal.templates.sub">Seleziona un template per aggiungere attività predefinite alla scheda attuale.</div>
     <div class="template-list" id="template-list"></div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-templates')">Annulla</button>
-      <button class="btn btn-primary" onclick="applyTemplate()">Aggiungi attività</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-templates')"
+              data-i18n="modal.cancel">Annulla</button>
+      <button class="btn btn-primary" onclick="applyTemplate()"
+              data-i18n="modal.templates.apply">Aggiungi attività</button>
     </div>
   </div>
 </div>
@@ -268,6 +302,7 @@
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 </script>
+<script src="js/i18n.js"></script>
 <script src="js/state.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/ui.js"></script>

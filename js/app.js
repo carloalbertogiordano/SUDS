@@ -7,7 +7,7 @@ function switchSessionModal(id) {
 
 function deleteSession(event, id) {
   if (event) event.stopPropagation();
-  if (!confirm('Eliminare questa sessione? L\'operazione non può essere annullata.')) return;
+  if (!confirm(t('confirm.delete-session'))) return;
   patient.sessioni = patient.sessioni.filter(s => s.id !== id);
   if (currentSessionId === id) {
     currentSessionId = patient.sessioni[patient.sessioni.length - 1].id;
@@ -17,12 +17,12 @@ function deleteSession(event, id) {
   renderActivities();
   syncVPBtn();
   autoSave();
-  toast('Sessione eliminata.');
+  toast(t('toast.session-deleted'));
 }
 
 function deleteCurrentSession() {
   if (patient.sessioni.length <= 1) {
-    toast('Impossibile eliminare l\'unica sessione.', 'err');
+    toast(t('toast.session-only'), 'err');
     return;
   }
   deleteSession(null, currentSessionId);
@@ -52,31 +52,31 @@ function createSession() {
   renderActivities();
   syncVPBtn();
   autoSave();
-  toast('Nuova sessione creata.');
+  toast(t('toast.session-created'));
 }
 
 function lockSession() {
   const sess = activeSession();
   if (!sess) return;
-  if (!confirm('Una sessione bloccata non può essere modificata. Continuare?')) return;
+  if (!confirm(t('confirm.lock-session'))) return;
   sess.locked = true;
   renderSessionSelector();
   renderActivities();
   syncVPBtn();
   autoSave();
-  toast('Sessione bloccata.');
+  toast(t('toast.session-locked'));
 }
 
 function unlockSession() {
   const sess = activeSession();
   if (!sess) return;
-  if (!confirm('Sbloccare la sessione? I dati torneranno modificabili.')) return;
+  if (!confirm(t('confirm.unlock-session'))) return;
   sess.locked = false;
   renderSessionSelector();
   renderActivities();
   syncVPBtn();
   autoSave();
-  toast('Sessione sbloccata.');
+  toast(t('toast.session-unlocked'));
 }
 
 function openNotesModal() {
@@ -92,7 +92,7 @@ function saveNotes() {
   sess.notePrivate = document.getElementById('notes-textarea').value;
   autoSave();
   closeModal('modal-notes');
-  toast('Note salvate.');
+  toast(t('toast.notes-saved'));
 }
 
 function addActivity() {
@@ -123,13 +123,13 @@ function deleteActivity(id) {
 function archiveActivity(id) {
   if (activeSession()?.locked) return;
   const a = patient.attivita.find(a => a.id === id);
-  if (a) { a.archiviata = true; renderActivities(); syncVPBtn(); autoSave(); toast('Attività archiviata.'); }
+  if (a) { a.archiviata = true; renderActivities(); syncVPBtn(); autoSave(); toast(t('toast.act-archived')); }
 }
 
 function unarchiveActivity(id) {
   if (activeSession()?.locked) return;
   const a = patient.attivita.find(a => a.id === id);
-  if (a) { a.archiviata = false; renderActivities(); syncVPBtn(); autoSave(); toast('Attività ripristinata.'); }
+  if (a) { a.archiviata = false; renderActivities(); syncVPBtn(); autoSave(); toast(t('toast.act-restored')); }
 }
 
 function toggleShowArchived() {
@@ -164,61 +164,63 @@ function updateNoteVP(actId, val) {
   autoSave();
 }
 
-const TEMPLATES = [
-  {
-    id: 'fobia-sociale',
-    nome: 'Fobia sociale',
-    attivita: [
-      { desc: 'Salutare un vicino di casa', stimato: 10 },
-      { desc: 'Telefonare a un negozio per chiedere info', stimato: 20 },
-      { desc: 'Fare una domanda in classe o in riunione', stimato: 35 },
-      { desc: 'Mangiare in un ristorante affollato', stimato: 45 },
-      { desc: 'Parlare con uno sconosciuto', stimato: 55 },
-      { desc: 'Fare un acquisto e chiedere uno scontrino', stimato: 60 },
-      { desc: 'Partecipare a una festa con persone non conosciute', stimato: 70 },
-      { desc: 'Fare una presentazione davanti a un gruppo', stimato: 85 },
-    ],
-  },
-  {
-    id: 'ansia-prestazione',
-    nome: 'Ansia da prestazione',
-    attivita: [
-      { desc: 'Leggere un testo ad alta voce da soli', stimato: 10 },
-      { desc: 'Consegnare un compito scritto', stimato: 20 },
-      { desc: 'Rispondere a una domanda del docente in aula', stimato: 40 },
-      { desc: 'Sostenere un colloquio di lavoro simulato', stimato: 55 },
-      { desc: 'Sostenere un esame scritto', stimato: 65 },
-      { desc: 'Sostenere un esame orale', stimato: 75 },
-      { desc: 'Esibirsi davanti a un pubblico (recita, sport, ecc.)', stimato: 85 },
-    ],
-  },
-  {
-    id: 'agorafobia',
-    nome: 'Agorafobia',
-    attivita: [
-      { desc: 'Stare in casa da soli per 30 minuti', stimato: 10 },
-      { desc: 'Passeggiare vicino a casa', stimato: 20 },
-      { desc: 'Fare la spesa in un piccolo negozio', stimato: 35 },
-      { desc: 'Prendere l\'autobus per una fermata', stimato: 50 },
-      { desc: 'Stare in una sala d\'attesa affollata', stimato: 60 },
-      { desc: 'Visitare un centro commerciale', stimato: 70 },
-      { desc: 'Viaggiare in treno per più fermate', stimato: 80 },
-      { desc: 'Stare in una piazza o in un parco affollato', stimato: 85 },
-    ],
-  },
-];
+function getTemplates() {
+  return [
+    {
+      id: 'fobia-sociale',
+      nome: t('tpl.social-phobia.name'),
+      attivita: [
+        { desc: t('tpl.social-phobia.0'), stimato: 10 },
+        { desc: t('tpl.social-phobia.1'), stimato: 20 },
+        { desc: t('tpl.social-phobia.2'), stimato: 35 },
+        { desc: t('tpl.social-phobia.3'), stimato: 45 },
+        { desc: t('tpl.social-phobia.4'), stimato: 55 },
+        { desc: t('tpl.social-phobia.5'), stimato: 60 },
+        { desc: t('tpl.social-phobia.6'), stimato: 70 },
+        { desc: t('tpl.social-phobia.7'), stimato: 85 },
+      ],
+    },
+    {
+      id: 'ansia-prestazione',
+      nome: t('tpl.perf.name'),
+      attivita: [
+        { desc: t('tpl.perf.0'), stimato: 10 },
+        { desc: t('tpl.perf.1'), stimato: 20 },
+        { desc: t('tpl.perf.2'), stimato: 40 },
+        { desc: t('tpl.perf.3'), stimato: 55 },
+        { desc: t('tpl.perf.4'), stimato: 65 },
+        { desc: t('tpl.perf.5'), stimato: 75 },
+        { desc: t('tpl.perf.6'), stimato: 85 },
+      ],
+    },
+    {
+      id: 'agorafobia',
+      nome: t('tpl.agora.name'),
+      attivita: [
+        { desc: t('tpl.agora.0'), stimato: 10 },
+        { desc: t('tpl.agora.1'), stimato: 20 },
+        { desc: t('tpl.agora.2'), stimato: 35 },
+        { desc: t('tpl.agora.3'), stimato: 50 },
+        { desc: t('tpl.agora.4'), stimato: 60 },
+        { desc: t('tpl.agora.5'), stimato: 70 },
+        { desc: t('tpl.agora.6'), stimato: 80 },
+        { desc: t('tpl.agora.7'), stimato: 85 },
+      ],
+    },
+  ];
+}
 
 let _selectedTemplate = null;
 
 function openTemplatesModal() {
-  if (activeSession()?.locked) { toast('Sessione bloccata.', 'err'); return; }
+  if (activeSession()?.locked) { toast(t('toast.locked-err'), 'err'); return; }
   _selectedTemplate = null;
   const list = document.getElementById('template-list');
   if (list) {
-    list.innerHTML = TEMPLATES.map(t => `
-      <div class="template-item" data-id="${t.id}" onclick="selectTemplate('${t.id}')">
-        <div class="template-item-name">${t.nome}</div>
-        <div class="template-item-preview">${t.attivita.map(a => a.desc).join(' · ')}</div>
+    list.innerHTML = getTemplates().map(tpl => `
+      <div class="template-item" data-id="${tpl.id}" onclick="selectTemplate('${tpl.id}')">
+        <div class="template-item-name">${tpl.nome}</div>
+        <div class="template-item-preview">${tpl.attivita.map(a => a.desc).join(' · ')}</div>
       </div>`).join('');
   }
   openModal('modal-templates');
@@ -232,8 +234,8 @@ function selectTemplate(id) {
 }
 
 function applyTemplate() {
-  if (!_selectedTemplate) { toast('Seleziona un template.', 'err'); return; }
-  const tpl = TEMPLATES.find(t => t.id === _selectedTemplate);
+  if (!_selectedTemplate) { toast(t('toast.sel-template'), 'err'); return; }
+  const tpl = getTemplates().find(tpl => tpl.id === _selectedTemplate);
   if (!tpl) return;
   tpl.attivita.forEach(({ desc, stimato }) => {
     const actId = uidAct();
@@ -246,7 +248,7 @@ function applyTemplate() {
   renderActivities();
   syncVPBtn();
   autoSave();
-  toast(`Template "${tpl.nome}" aggiunto.`);
+  toast(t('toast.tpl-applied', { name: tpl.nome }));
 }
 
 function exportCSV() {
@@ -267,7 +269,7 @@ function exportCSV() {
   a.download = `SUDS_${patient.cognome}_${patient.nome}_${patient.id}.csv`;
   a.click();
   URL.revokeObjectURL(url);
-  toast('CSV esportato.');
+  toast(t('toast.csv-exported'));
 }
 
 function updateDesc(id, val) {
@@ -351,7 +353,7 @@ async function saveToFileHandle(handle) {
     await writable.close();
     markSaved();
     syncSaveBtn();
-    toast('File aggiornato correttamente.');
+    toast(t('toast.file-updated'));
   } catch (err) {
     console.error(err);
     exportJSON();
@@ -387,7 +389,7 @@ async function exportJSON() {
   URL.revokeObjectURL(url);
   markSaved();
   syncSaveBtn();
-  toast('Scheda scaricata come JSON.');
+  toast(t('toast.file-downloaded'));
 }
 
 function triggerImport() {
@@ -410,7 +412,7 @@ async function importWithFS() {
     const text = await file.text();
     processImportedJSON(text);
   } catch (err) {
-    if (err.name !== 'AbortError') toast('Errore nel caricamento.', 'err');
+    if (err.name !== 'AbortError') toast(t('toast.load-error'), 'err');
   }
 }
 
@@ -427,16 +429,16 @@ function onFileImport(e) {
 function processImportedJSON(text) {
   try {
     let data = JSON.parse(text);
-    if (!data.id || !data.nome || !data.cognome) { toast('File non valido.', 'err'); return; }
+    if (!data.id || !data.nome || !data.cognome) { toast(t('toast.file-invalid'), 'err'); return; }
     const wasV1 = !data.v || data.v < 2;
     if (wasV1) data = migrateV1toV2(data);
     patient = data;
     currentSessionId = patient.sessioni[patient.sessioni.length - 1].id;
     renderPatient();
     showView('view-patient');
-    toast(wasV1 ? 'Scheda aggiornata al formato corrente.' : 'Scheda caricata.');
+    toast(wasV1 ? t('toast.migrated') : t('toast.loaded'));
   } catch {
-    toast('Errore nella lettura del file.', 'err');
+    toast(t('toast.read-error'), 'err');
   }
 }
 
@@ -506,7 +508,7 @@ function switchSession(id) {
 
 function goHome() {
   if (patient && patient.attivita.length > 0) {
-    if (!confirm('Tornando alla home perderai le modifiche non salvate. Continuare?')) return;
+    if (!confirm(t('confirm.go-home'))) return;
   }
   patient = null;
   currentSessionId = null;
@@ -523,8 +525,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (raw) {
       const data    = JSON.parse(raw);
       const last    = data.sessioni?.[data.sessioni.length - 1];
-      const dateStr = last ? ` del ${formatDate(last.data)}` : '';
-      if (confirm(`Trovata sessione non salvata di ${data.nome} ${data.cognome}${dateStr}.\nRipristinare?`)) {
+      const dateStr = last ? t('sess.date-sep') + formatDate(last.data) : '';
+      if (confirm(t('confirm.restore-draft', { name: `${data.nome} ${data.cognome}`, date: dateStr }))) {
         patient           = data;
         currentSessionId  = patient.sessioni[patient.sessioni.length - 1].id;
         renderPatient();

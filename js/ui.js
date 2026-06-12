@@ -45,21 +45,21 @@ function syncSaveBtn() {
   const btn = document.getElementById('btn-save');
   if (!btn) return;
   if (!_hasFileAPI) {
-    btn.innerHTML = '&#8681; Scarica JSON';
-    btn.dataset.tooltip = 'Scarica copia JSON — Firefox non supporta la sovrascrittura diretta';
+    btn.textContent = t('bar.save-download');
+    btn.dataset.tooltip = t('bar.save-tt-download');
   } else if (fileHandle) {
-    btn.innerHTML = '&#128190; Salva';
-    btn.dataset.tooltip = 'Sovrascrive il file aperto';
+    btn.textContent = t('bar.save-overwrite');
+    btn.dataset.tooltip = t('bar.save-tt-overwrite');
   } else {
-    btn.innerHTML = '&#128190; Esporta JSON';
-    btn.dataset.tooltip = 'Scegli dove salvare il file JSON';
+    btn.textContent = t('bar.save-export');
+    btn.dataset.tooltip = t('bar.save-tt-export');
   }
   btn.classList.toggle('has-changes', _unsaved);
 }
 
 function renderPatient() {
   document.getElementById('pt-name').textContent = `${patient.nome} ${patient.cognome}`;
-  document.getElementById('pt-code').textContent = `Codice: #${patient.id}`;
+  document.getElementById('pt-code').textContent = t('bar.code', { id: patient.id });
   renderSessionSelector();
   renderActivities();
   syncVPBtn();
@@ -73,7 +73,8 @@ function renderSessionSelector() {
     const n     = patient.sessioni.length - i;
     const lock  = s.locked ? ' 🔒' : '';
     const title = s.titolo ? ` · ${s.titolo}` : '';
-    return `<option value="${s.id}" ${s.id === currentSessionId ? 'selected' : ''}>Sessione ${n} — ${formatDate(s.data)}${title}${lock}</option>`;
+    const label = t('sess.n', { n }) + t('sess.date-sep') + formatDate(s.data) + title + lock;
+    return `<option value="${s.id}" ${s.id === currentSessionId ? 'selected' : ''}>${label}</option>`;
   }).join('');
 
   const sess      = activeSession();
@@ -120,9 +121,9 @@ function renderSessionList() {
     <div class="sess-item${isActive ? ' sess-active' : ''}"
          onclick="${isActive ? '' : `switchSessionModal('${s.id}')`}">
       <div class="sess-item-info">
-        <div class="sess-item-name">Sessione ${n}${s.locked ? ' 🔒' : ''} <span class="sess-item-date">${formatDate(s.data)}</span></div>
+        <div class="sess-item-name">${t('sess.n', { n })}${s.locked ? ' 🔒' : ''} <span class="sess-item-date">${formatDate(s.data)}</span></div>
         <input class="sess-title-input" value="${esc(s.titolo || '')}"
-               placeholder="Aggiungi titolo..."
+               placeholder="${t('modal.sessions.title-input-ph')}"
                onclick="event.stopPropagation()"
                onchange="updateSessionTitolo('${s.id}', this.value)">
       </div>
@@ -172,11 +173,11 @@ function actRowHTML(a, i, sess, locked, archived) {
                onchange="toggleSel('${a.id}', this.checked)">`}
     <span class="act-rank">${archived ? '' : i + 1}</span>
     <input type="text" class="act-desc-input" value="${esc(a.desc)}"
-           placeholder="Descrivi l'attività..." ${archived ? 'readonly' : ro}
+           placeholder="${t('act.placeholder')}" ${archived ? 'readonly' : ro}
            oninput="updateDesc('${a.id}', this.value)">
     <div class="act-score-wrap">
       <div class="score-col">
-        <span class="score-col-label">Stimato</span>
+        <span class="score-col-label">${t('act.stimato')}</span>
         <div class="score-input-row">
           <input type="number" class="act-score-input" value="${stimato}"
                  min="0" max="100" ${archived ? 'readonly' : ro}
@@ -186,7 +187,7 @@ function actRowHTML(a, i, sess, locked, archived) {
         </div>
       </div>
       <div class="score-col">
-        <span class="score-col-label">Vissuto</span>
+        <span class="score-col-label">${t('act.vissuto')}</span>
         <div class="score-input-row">
           <input type="number" class="act-score-input vissuto-input ${vc}"
                  value="${vissVal}" min="0" max="100" placeholder="—" ${archived ? 'readonly' : ro}
@@ -195,7 +196,7 @@ function actRowHTML(a, i, sess, locked, archived) {
         </div>
       </div>
       <div class="score-col score-col-target">
-        <span class="score-col-label">Target</span>
+        <span class="score-col-label">${t('act.target')}</span>
         <div class="score-input-row">
           <input type="number" class="act-score-input target-input" value="${targVal}"
                  min="0" max="100" placeholder="—" ${archived ? 'readonly' : ro}
@@ -205,9 +206,9 @@ function actRowHTML(a, i, sess, locked, archived) {
       </div>
     </div>
     ${archived
-      ? `<button class="btn-arch btn-unarch" onclick="unarchiveActivity('${a.id}')" title="Ripristina" ${dis}>&#8593;</button>`
-      : `<button class="btn-arch" onclick="archiveActivity('${a.id}')" title="Archivia" ${dis}>&#128451;</button>
-         <button class="btn-del" onclick="deleteActivity('${a.id}')" title="Elimina" ${dis}>&#215;</button>`}
+      ? `<button class="btn-arch btn-unarch" onclick="unarchiveActivity('${a.id}')" title="${t('act.unarchive-tt')}" ${dis}>&#8593;</button>`
+      : `<button class="btn-arch" onclick="archiveActivity('${a.id}')" title="${t('act.archive-tt')}" ${dis}>&#128451;</button>
+         <button class="btn-del" onclick="deleteActivity('${a.id}')" title="${t('act.delete-tt')}" ${dis}>&#215;</button>`}
   </div>`;
 }
 
@@ -235,7 +236,7 @@ function renderActivities() {
   if (archived.length) {
     html += `<div class="archived-separator">
       <button class="btn-arch-toggle" onclick="toggleShowArchived()">
-        ${showArchived ? '&#9650;' : '&#9660;'} Archivio (${archived.length})
+        ${showArchived ? '&#9650;' : '&#9660;'} ${t('act.archived-section', { n: archived.length })}
       </button>
     </div>`;
     if (showArchived) {
@@ -257,7 +258,8 @@ function openCompareModal() {
   const opts = patient.sessioni.slice().reverse().map((s, i) => {
     const n     = patient.sessioni.length - i;
     const title = s.titolo ? ` · ${s.titolo}` : '';
-    return `<option value="${s.id}">Sessione ${n} — ${formatDate(s.data)}${title}</option>`;
+    const label = t('sess.n', { n }) + t('sess.date-sep') + formatDate(s.data) + title;
+    return `<option value="${s.id}">${label}</option>`;
   }).join('');
 
   const selA = document.getElementById('compare-sess-a');
@@ -322,15 +324,14 @@ function renderCompareTable() {
   wrap.innerHTML = `
     <table class="compare-table">
       <thead><tr>
-        <th>Attività</th>
+        <th>${t('compare.col-activity')}</th>
         <th>${hA}</th>
         <th>${hB}</th>
         <th>Δ</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <p class="compare-hint">Stimato &nbsp;·&nbsp; <span class="compare-vissuto">(vissuto)</span> &nbsp;·&nbsp;
-      <span class="delta-better">verde = miglioramento</span> nella direzione sessione A → B</p>`;
+    <p class="compare-hint">${t('compare.hint')}</p>`;
 }
 
 function openProgressiView() {
@@ -428,7 +429,7 @@ function renderChart() {
       scales: {
         y: {
           min: 0, max: 100,
-          title: { display: true, text: 'Punteggio SUDS', color: '#5E7880', font: { size: 12 } },
+          title: { display: true, text: t('prog.y-axis'), color: '#5E7880', font: { size: 12 } },
           grid:  { color: '#E4EEF1' },
           ticks: { stepSize: 10, color: '#5E7880' },
         },
@@ -460,7 +461,7 @@ function renderChart() {
             label: ctx => {
               const val = ctx.parsed.y;
               if (val === null || val === undefined) return null;
-              const type = ctx.dataset.isTarget ? 'Target' : ctx.dataset.isVissuto ? 'Vissuto' : 'Stimato';
+              const type = ctx.dataset.isTarget ? t('chart.target') : ctx.dataset.isVissuto ? t('chart.vissuto') : t('chart.stimato');
               return `  ${ctx.dataset.label} — ${type}: ${val}`;
             },
           },
@@ -494,7 +495,7 @@ function renderPresentazione() {
 
   if (!items.length) {
     body.innerHTML =
-      '<p style="color:var(--text-2);font-size:22px;text-align:center;padding:80px 0">Nessuna attività.</p>';
+      `<p style="color:var(--text-2);font-size:22px;text-align:center;padding:80px 0">${t('presenta.no-acts')}</p>`;
     return;
   }
 
@@ -508,7 +509,7 @@ function renderPresentazione() {
       const cls = vissuto < stimato ? 'better' : vissuto > stimato ? 'worse' : 'same';
       vissutoHtml = `
         <div class="presenta-score-group">
-          <span class="presenta-score-label">Vissuto</span>
+          <span class="presenta-score-label">${t('presenta.vissuto-label')}</span>
           <span class="presenta-vissuto-val ${cls}">${vissuto}</span>
         </div>`;
     }
@@ -519,7 +520,7 @@ function renderPresentazione() {
       <span class="presenta-desc">${esc(a.desc) || '(senza nome)'}</span>
       <div class="presenta-scores">
         <div class="presenta-score-group">
-          <span class="presenta-score-label">Stimato</span>
+          <span class="presenta-score-label">${t('presenta.stimato-label')}</span>
           <span class="presenta-score-val">${stimato}</span>
         </div>
         ${vissutoHtml}
@@ -552,7 +553,7 @@ function updatePresentaHeader() {
   const n   = presentaHidden.size;
   const btn = document.getElementById('presenta-reset');
   if (!btn) return;
-  btn.textContent = n > 0 ? `Mostra tutti (${n} nascost${n === 1 ? 'a' : 'e'})` : '';
+  btn.textContent = n > 0 ? t('presenta.show-all', { n, e: currentLang === 'it' ? (n === 1 ? 'a' : 'e') : '' }) : '';
   btn.classList.toggle('visible', n > 0);
 }
 
@@ -573,7 +574,7 @@ function renderQRView(data) {
     const visHtml = a.vissuto !== null ? (() => {
       const cls = a.vissuto < a.stimato ? 'success' : a.vissuto > a.stimato ? 'worse' : 'same';
       return `<div class="qr-score-group">
-        <span class="qr-score-label">Vissuto</span>
+        <span class="qr-score-label">${t('qr.vissuto-label')}</span>
         <span class="qr-score-val qr-vissuto ${cls}">${a.vissuto}<span class="qr-denom">/100</span></span>
       </div>`;
     })() : '';
@@ -584,7 +585,7 @@ function renderQRView(data) {
       <span class="qr-act-desc">${esc(a.desc || '(senza nome)')}</span>
       <div class="qr-scores">
         <div class="qr-score-group">
-          <span class="qr-score-label">Ansia stimata</span>
+          <span class="qr-score-label">${t('qr.stimato-label')}</span>
           <span class="qr-score-val">${a.stimato}<span class="qr-denom">/100</span></span>
         </div>
         ${visHtml}

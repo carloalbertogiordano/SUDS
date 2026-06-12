@@ -98,6 +98,20 @@ body {
 }
 .home-support-link:hover { color: var(--primary); }
 
+.btn-lang {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  color: var(--text-2);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 12px;
+  margin-top: 12px;
+  align-self: center;
+  transition: color .15s, border-color .15s;
+}
+.btn-lang:hover { color: var(--primary); border-color: var(--primary); }
+
 .home-card {
   background: var(--surface);
   border-radius: var(--r);

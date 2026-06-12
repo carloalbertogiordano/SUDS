@@ -26,13 +26,13 @@ function openVPView() {
   const sess = activeSession();
   if (!sess) return;
   const selActs = sorted().filter(a => sess.punteggi.find(p => p.attivita_id === a.id)?.sel);
-  if (!selActs.length) { toast('Seleziona almeno un\'attività.', 'err'); return; }
+  if (!selActs.length) { toast(t('toast.sel-activity'), 'err'); return; }
 
   document.getElementById('vp-patient-name').textContent = `${patient.nome} ${patient.cognome}`;
   document.getElementById('vp-general').value = sess?.noteVPGenerale || '';
   const genBtn = document.getElementById('vp-genera-btn');
   genBtn.disabled    = false;
-  genBtn.textContent = 'Genera PDF';
+  genBtn.textContent = t('vp.generate');
   document.getElementById('vp-result-bar').style.display = 'none';
   _pdfResult = null;
 
@@ -45,9 +45,9 @@ function openVPView() {
         <span class="vp-badge">${p?.stimato ?? 0}</span>
         <span class="vp-act-name">${esc(a.desc) || '(attività senza nome)'}</span>
       </div>
-      <label class="vp-note-label">Nota per questa attività</label>
+      <label class="vp-note-label">${t('vp.note-label')}</label>
       <textarea class="field-textarea" data-id="${a.id}"
-                placeholder="Inserisci una nota specifica..."
+                placeholder="${t('vp.note-ph')}"
                 style="min-height:80px"
                 oninput="updateNoteVP('${a.id}', this.value)">${esc(savedNote)}</textarea>
     </div>`;
@@ -66,25 +66,24 @@ function closeVPView() {
 async function preparePDF() {
   const btn = document.getElementById('vp-genera-btn');
   btn.disabled    = true;
-  btn.textContent = 'Generazione…';
+  btn.textContent = t('vp.generating');
   try {
     _pdfResult = await generatePDF();
-    if (!_pdfResult) { btn.disabled = false; btn.textContent = 'Genera PDF'; return; }
-    btn.innerHTML = '&#8635; Rigenera';
+    if (!_pdfResult) { btn.disabled = false; btn.textContent = t('vp.generate'); return; }
+    btn.textContent = t('vp.regenerate');
     btn.disabled    = false;
-    
+
     const bar = document.getElementById('vp-result-bar');
     bar.style.display = 'flex';
-    
-    // Show QR on screen
+
     renderQRToCanvas();
-    
-    toast('PDF pronto.');
+
+    toast(t('toast.pdf-ready'));
   } catch(e) {
     console.error(e);
-    toast('Errore nella generazione del PDF.', 'err');
+    toast(t('toast.pdf-error'), 'err');
     btn.disabled    = false;
-    btn.textContent = 'Genera PDF';
+    btn.textContent = t('vp.generate');
   }
 }
 
@@ -173,12 +172,12 @@ function downloadPDF() {
   a.download = _pdfResult.fname;
   a.click();
   URL.revokeObjectURL(url);
-  toast('PDF salvato.');
+  toast(t('toast.pdf-saved'));
 }
 
 async function generatePDF() {
   const { jsPDF } = window.jspdf;
-  if (!jsPDF) { toast('jsPDF non caricato. Connetti Internet e riprova.', 'err'); return null; }
+  if (!jsPDF) { toast(t('toast.jspdf-missing'), 'err'); return null; }
 
   const sess    = activeSession();
   const selActs = sorted().filter(a => sess?.punteggi.find(p => p.attivita_id === a.id)?.sel);
@@ -224,10 +223,10 @@ async function generatePDF() {
   doc.setTextColor(...C_WHITE);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
-  doc.text('Voglio Provare', ML, 18);
+  doc.text(t('pdf.title'), ML, 18);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10.5);
-  const dateStr = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+  const dateStr = new Date().toLocaleDateString(t('pdf.locale'), { day: '2-digit', month: 'long', year: 'numeric' });
   doc.text(`${patient.nome} ${patient.cognome}  ·  #${patient.id}  ·  ${dateStr}`, ML, 32);
   y = 52;
 
@@ -243,7 +242,7 @@ async function generatePDF() {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8.5);
     doc.setTextColor(...C_TEXT2);
-    doc.text('NOTE GENERALI', ML + 8, y + 8);
+    doc.text(t('pdf.notes-header'), ML + 8, y + 8);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     doc.setTextColor(...C_TEXT);
@@ -259,7 +258,7 @@ async function generatePDF() {
   doc.setTextColor(...C_TEXT2);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
-  doc.text('ATTIVITÀ SELEZIONATE — ORDINATE PER PUNTEGGIO CRESCENTE', ML, y);
+  doc.text(t('pdf.acts-header'), ML, y);
   y += 12;
 
   const noteMap = {};
@@ -310,7 +309,7 @@ async function generatePDF() {
       doc.setTextColor(...C_PRIMARY_D);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(NLFS);
-      doc.text('Nota:', NoteX, noteSectionY + NLABEL_H - 1);
+      doc.text(t('pdf.note-label'), NoteX, noteSectionY + NLABEL_H - 1);
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(NoteFS);
       doc.setTextColor(...C_TEXT2);
@@ -336,7 +335,7 @@ async function generatePDF() {
         doc.setFontSize(6.5);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(...C_TEXT2);
-        doc.text('Scansiona per rileggere', qrX + 12, y + 25.5, { align: 'center' });
+        doc.text(t('pdf.qr-caption'), qrX + 12, y + 25.5, { align: 'center' });
         y += QR_H;
       }
     }
@@ -349,12 +348,12 @@ async function generatePDF() {
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...C_TEXT2);
     doc.text(
-      `SUDS — Scala di Disagio Soggettivo  ·  Pagina ${p} di ${totalPages}`,
+      t('pdf.footer', { p, total: totalPages }),
       PW / 2, PH - 9, { align: 'center' }
     );
   }
 
-  const fname = `VoglioProvare_${patient.cognome}_${patient.id}_${new Date().toLocaleDateString('it-IT').replace(/\//g, '-')}.pdf`;
+  const fname = `VoglioProvare_${patient.cognome}_${patient.id}_${new Date().toLocaleDateString(t('pdf.locale')).replace(/\//g, '-')}.pdf`;
   const blob  = doc.output('blob');
   return { blob, fname };
 }
