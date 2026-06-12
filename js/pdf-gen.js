@@ -75,9 +75,6 @@ async function preparePDF() {
 
     const bar = document.getElementById('vp-result-bar');
     bar.style.display = 'flex';
-
-    renderQRToCanvas();
-
     toast(t('toast.pdf-ready'));
   } catch(e) {
     console.error(e);

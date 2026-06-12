@@ -224,7 +224,6 @@ function renderActivities() {
   if (!active.length && !archived.length) {
     if (list) list.style.display  = 'none';
     if (empty) empty.style.display = '';
-    updateArchivedToggle(archived.length);
     return;
   }
 
@@ -245,13 +244,6 @@ function renderActivities() {
   }
 
   if (list) list.innerHTML = html;
-  updateArchivedToggle(archived.length);
-}
-
-function updateArchivedToggle(count) {
-  const btn = document.getElementById('btn-archived-toggle');
-  if (!btn) return;
-  btn.style.display = count ? '' : 'none';
 }
 
 function openCompareModal() {
