@@ -24,6 +24,11 @@ function formatDate(iso) {
   return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function b64decode(b64str) {
+  const bytes = Uint8Array.from(atob(b64str), c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
 function toast(msg, type = 'ok') {
   const el = document.getElementById('toast');
   if (!el) return;

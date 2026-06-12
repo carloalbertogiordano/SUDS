@@ -195,6 +195,7 @@ async function saveToFileHandle(handle) {
     const writable = await handle.createWritable();
     await writable.write(JSON.stringify(patient, null, 2));
     await writable.close();
+    syncSaveBtn();
     toast('File aggiornato correttamente.');
   } catch (err) {
     console.error(err);
@@ -213,6 +214,7 @@ async function exportJSON() {
         types: [{ description: 'JSON File', accept: { 'application/json': ['.json'] } }]
       });
       if (fileHandle) {
+          syncSaveBtn();
           saveToFileHandle(fileHandle);
           return;
       }
@@ -313,7 +315,7 @@ function initFromHash() {
   const match = hash.match(/^#view=voglio-provare&data=(.+)$/);
   if (!match) return;
   try {
-    const decoded = decodeURIComponent(escape(atob(decodeURIComponent(match[1]))));
+    const decoded = b64decode(decodeURIComponent(match[1]));
     const data    = JSON.parse(decoded);
     if (!data.nome || !Array.isArray(data.attivita)) return;
     renderQRView(data);

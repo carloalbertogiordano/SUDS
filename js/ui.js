@@ -27,12 +27,30 @@ function showView(id) {
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
+const _hasFileAPI = typeof window.showSaveFilePicker === 'function';
+
+function syncSaveBtn() {
+  const btn = document.getElementById('btn-save');
+  if (!btn) return;
+  if (!_hasFileAPI) {
+    btn.innerHTML = '&#8681; Scarica JSON';
+    btn.dataset.tooltip = 'Scarica copia JSON — Firefox non supporta la sovrascrittura diretta';
+  } else if (fileHandle) {
+    btn.innerHTML = '&#128190; Salva';
+    btn.dataset.tooltip = 'Sovrascrive il file aperto';
+  } else {
+    btn.innerHTML = '&#128190; Esporta JSON';
+    btn.dataset.tooltip = 'Scegli dove salvare il file JSON';
+  }
+}
+
 function renderPatient() {
   document.getElementById('pt-name').textContent = `${patient.nome} ${patient.cognome}`;
   document.getElementById('pt-code').textContent = `Codice: #${patient.id}`;
   renderSessionSelector();
   renderActivities();
   syncVPBtn();
+  syncSaveBtn();
 }
 
 function renderSessionSelector() {
