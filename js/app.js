@@ -478,7 +478,8 @@ function initFromHash() {
   if (!match) return;
   try {
     const decoded = b64decode(decodeURIComponent(match[1]));
-    const data    = JSON.parse(decoded);
+    const raw  = JSON.parse(decoded);
+    const data = normalizeQRPayload(raw);
     if (!data.nome || !Array.isArray(data.attivita)) return;
     renderQRView(data);
     showView('view-qr-read');

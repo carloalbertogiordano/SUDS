@@ -209,23 +209,19 @@
   <div class="presenta-body" id="presenta-body"></div>
 </div>
 
-<!-- ==================== VIEW: QR scheda readonly ==================== -->
+<!-- ==================== VIEW: Paziente (link condiviso) ==================== -->
 <div id="view-qr-read" class="view">
-  <header class="patient-bar" style="flex-direction:row;align-items:center;gap:16px;">
-    <div class="patient-meta">
-      <div class="patient-fullname" id="qr-patient-name"></div>
-      <div class="patient-code" id="qr-session-date"></div>
+  <div class="qr-page">
+    <div class="qr-page-header">
+      <div class="qr-page-brand">Voglio Provare</div>
+      <div class="qr-page-name" id="qr-patient-name"></div>
+      <div class="qr-page-date" id="qr-session-date"></div>
     </div>
-    <div class="bar-actions">
-      <button class="btn btn-outline" onclick="window.print()" data-tooltip="Stampa questa scheda">&#128424; Stampa</button>
+    <p class="qr-note-generale" id="qr-note-generale" style="display:none"></p>
+    <div class="qr-act-list" id="qr-act-list"></div>
+    <div class="qr-page-footer">
+      <button class="btn btn-outline" onclick="window.print()">&#128424; Stampa</button>
     </div>
-  </header>
-  <div class="patient-body">
-    <p class="qr-read-info">&#128274; Scheda in sola lettura — generata tramite QR code.</p>
-    <div class="sec-head">
-      <span class="sec-label">Attività</span>
-    </div>
-    <div class="act-list" id="qr-act-list"></div>
   </div>
 </div>
 

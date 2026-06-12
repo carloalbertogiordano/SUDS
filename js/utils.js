@@ -24,6 +24,20 @@ function formatDate(iso) {
   return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function normalizeQRPayload(data) {
+  // Accepts both compact format {n,dt,ng,a:[{d,s,v}]} and legacy {nome,data,attivita:[{desc,stimato,vissuto}]}
+  return {
+    nome:         data.n  || data.nome  || '',
+    data:         data.dt || data.data  || '',
+    noteGenerale: data.ng || '',
+    attivita: (data.a || data.attivita || []).map(a => ({
+      desc:    a.d  || a.desc    || '',
+      stimato: a.s  ?? a.stimato ?? 0,
+      vissuto: (a.v !== undefined ? a.v : null) ?? a.vissuto ?? null,
+    })),
+  };
+}
+
 function b64decode(b64str) {
   const bytes = Uint8Array.from(atob(b64str), c => c.charCodeAt(0));
   return new TextDecoder().decode(bytes);

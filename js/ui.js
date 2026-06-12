@@ -558,35 +558,34 @@ function updatePresentaHeader() {
 
 function renderQRView(data) {
   document.getElementById('qr-patient-name').textContent = data.nome;
-  document.getElementById('qr-session-date').textContent  = `Sessione del ${formatDate(data.data)}`;
+  document.getElementById('qr-session-date').textContent = formatDate(data.data);
+
+  const noteEl = document.getElementById('qr-note-generale');
+  if (noteEl) {
+    noteEl.textContent = data.noteGenerale || '';
+    noteEl.style.display = data.noteGenerale ? '' : 'none';
+  }
 
   const list = document.getElementById('qr-act-list');
   if (!list) return;
 
   list.innerHTML = data.attivita.map((a, i) => {
     const visHtml = a.vissuto !== null ? (() => {
-      const cls = a.vissuto < a.stimato ? 'var(--success)' : a.vissuto > a.stimato ? 'var(--warn)' : 'var(--primary)';
-      return `
-        <div class="score-col">
-          <span class="score-col-label">Vissuto</span>
-          <div class="score-input-row">
-            <span style="font-size:24px;font-weight:700;font-family:'Lora',serif;color:${cls}">${a.vissuto}</span>
-            <span class="score-denom">/100</span>
-          </div>
-        </div>`;
+      const cls = a.vissuto < a.stimato ? 'success' : a.vissuto > a.stimato ? 'worse' : 'same';
+      return `<div class="qr-score-group">
+        <span class="qr-score-label">Vissuto</span>
+        <span class="qr-score-val qr-vissuto ${cls}">${a.vissuto}<span class="qr-denom">/100</span></span>
+      </div>`;
     })() : '';
 
     return `
-    <div class="act-row">
-      <span class="act-rank">${i + 1}</span>
-      <span style="flex:1;padding:4px 8px;font-size:16px;color:var(--text)">${esc(a.desc || '(senza nome)')}</span>
-      <div class="act-score-wrap">
-        <div class="score-col">
-          <span class="score-col-label">Stimato</span>
-          <div class="score-input-row">
-            <span style="font-size:24px;font-weight:700;font-family:'Lora',serif;color:var(--primary)">${a.stimato}</span>
-            <span class="score-denom">/100</span>
-          </div>
+    <div class="qr-act-card">
+      <span class="qr-act-num">${i + 1}</span>
+      <span class="qr-act-desc">${esc(a.desc || '(senza nome)')}</span>
+      <div class="qr-scores">
+        <div class="qr-score-group">
+          <span class="qr-score-label">Ansia stimata</span>
+          <span class="qr-score-val">${a.stimato}<span class="qr-denom">/100</span></span>
         </div>
         ${visHtml}
       </div>

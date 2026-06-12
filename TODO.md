@@ -20,4 +20,6 @@
 - [x] **Export CSV** — esportare tutte le sessioni in CSV per analisi esterna (Excel, SPSS)
 - [x] **PWA installabile** — `manifest.json` + service worker + icone SVG; funziona offline per asset locali
 - [x] **Condivisione PDF diretta (no link)** — rimosso Email (mailto non supporta allegati); WhatsApp e Telegram auto-generano il PDF e usano `navigator.share({ files })` su mobile (picker OS nativo), fallback link su desktop. Da verificare comportamento su iOS/Android reali.
+- [ ] **⚠️ Condivisione su desktop** — su desktop `navigator.share` non esiste: nessun browser lo supporta. Unica alternativa reale è download + incolla manuale. Valutare se mostrare un messaggio esplicativo su desktop invece dei bottoni WA/TG.
+- [ ] **⚠️ PDF in QR: non fattibile** — QR max ~3KB, PDF tipicamente 50–300KB. Non è possibile embeddare il file. Alternativa: QR → URL di un PDF hostato (richiede backend/storage). Se si vuole condivisione offline del PDF, unica via è `navigator.share` su mobile o download.
 - [ ] **Bottone "Problemi? Serve una mano?"** — home page, punta a `https://github.com/carloalbertogiordano/SUDS/issues/new`; aggiungere pagina/sezione nel repo con spiegazione su come aprire una issue (titolo descrittivo, cosa fare, cosa non fare)

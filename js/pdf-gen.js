@@ -7,14 +7,19 @@ function b64encode(str) {
 }
 
 function buildQRPayload(selActs, sess) {
-  return {
-    nome:     `${patient.nome} ${patient.cognome}`,
-    data:     sess?.data ?? today(),
-    attivita: selActs.map(a => {
-      const p = sess?.punteggi.find(p => p.attivita_id === a.id);
-      return { desc: a.desc, stimato: p?.stimato ?? 0, vissuto: p?.vissuto ?? null };
+  const payload = {
+    n:  `${patient.nome} ${patient.cognome}`,
+    dt: sess?.data ?? today(),
+    a:  selActs.map(a => {
+      const p   = sess?.punteggi.find(p => p.attivita_id === a.id);
+      const obj = { d: a.desc, s: p?.stimato ?? 0 };
+      if (p?.vissuto !== null && p?.vissuto !== undefined) obj.v = p.vissuto;
+      return obj;
     }),
   };
+  const ng = sess?.noteVPGenerale?.trim();
+  if (ng) payload.ng = ng;
+  return payload;
 }
 
 function openVPView() {

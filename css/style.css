@@ -666,14 +666,137 @@ body {
 /* ============================================================
    QR READONLY VIEW
 ============================================================ */
-.qr-read-info {
-  font-size: 12px;
+/* ===== PATIENT LINK VIEW ===== */
+.qr-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+  min-height: 100vh;
+}
+
+.qr-page-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+.qr-page-brand {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.qr-page-name {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.qr-page-date {
+  font-size: 14px;
   color: var(--text-2);
+}
+
+.qr-note-generale {
   background: var(--primary-light);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: 10px 14px;
-  margin-bottom: 20px;
+  border-left: 3px solid var(--primary);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  padding: 14px 18px;
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.qr-act-list { display: flex; flex-direction: column; gap: 14px; }
+
+.qr-act-card {
+  background: var(--surface);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.qr-act-num {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary);
+  min-width: 36px;
+  line-height: 1;
+  padding-top: 2px;
+}
+
+.qr-act-desc {
+  flex: 1;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.45;
+  padding-top: 4px;
+  word-break: break-word;
+}
+
+.qr-scores {
+  display: flex;
+  gap: 20px;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.qr-score-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.qr-score-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-2);
+}
+
+.qr-score-val {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1;
+}
+
+.qr-vissuto.success { color: var(--success); }
+.qr-vissuto.worse   { color: var(--warn); }
+.qr-vissuto.same    { color: var(--primary); }
+
+.qr-denom {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-2);
+  margin-left: 1px;
+}
+
+.qr-page-footer {
+  text-align: center;
+  margin-top: 40px;
+}
+
+@media (max-width: 480px) {
+  .qr-act-card { flex-wrap: wrap; }
+  .qr-scores { width: 100%; justify-content: flex-end; }
 }
 
 /* ============================================================
