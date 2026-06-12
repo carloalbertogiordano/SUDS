@@ -87,6 +87,17 @@ body {
   justify-content: center;
 }
 
+.home-support-link {
+  display: block;
+  margin-top: 28px;
+  font-size: 13px;
+  color: #a0b8bf;
+  text-decoration: none;
+  text-align: center;
+  transition: color .15s;
+}
+.home-support-link:hover { color: var(--primary); }
+
 .home-card {
   background: var(--surface);
   border-radius: var(--r);
