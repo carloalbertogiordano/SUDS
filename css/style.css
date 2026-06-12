@@ -1022,15 +1022,33 @@ body {
   width: 100%;
 }
 
-.progressi-chart-container {
-  position: relative;
-  height: 60vh;
-  min-height: 400px;
+.progressi-charts {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.prog-chart-card {
   background: var(--surface);
   border: 1px solid var(--border-light);
-  border-radius: var(--r-md);
-  padding: 24px;
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--r);
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+}
+
+.prog-chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.prog-chart-wrap {
+  position: relative;
+  height: 180px;
 }
 
 /* ============================================================

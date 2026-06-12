@@ -1,6 +1,6 @@
 'use strict';
 
-let chartInstance = null;
+let chartInstances = [];
 let presentaHidden = new Set();
 const CHART_COLORS = [
   '#5B8E9F', '#4A8A6A', '#C87941', '#7B6FAF',
@@ -199,7 +199,7 @@ function actRowHTML(a, i, sess, locked, archived) {
         <span class="score-col-label">${t('act.target')}</span>
         <div class="score-input-row">
           <input type="number" class="act-score-input target-input" value="${targVal}"
-                 min="0" max="100" placeholder="—" ${archived ? 'readonly' : ro}
+                 min="0" max="100" placeholder="—" ${archived ? 'readonly' : ''}
                  oninput="updateTarget('${a.id}', this.value)">
           <span class="score-denom">/100</span>
         </div>
@@ -339,135 +339,139 @@ function openProgressiView() {
   if (el) el.textContent = `${patient.nome} ${patient.cognome}`;
   document.getElementById('view-progressi').classList.add('open');
   document.body.style.overflow = 'hidden';
-  setTimeout(renderChart, 80);
+  setTimeout(renderCharts, 80);
 }
 
 function closeProgressiView() {
-  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+  chartInstances.forEach(c => c.destroy());
+  chartInstances = [];
   document.getElementById('view-progressi').classList.remove('open');
   document.body.style.overflow = '';
 }
 
-function renderChart() {
-  if (!window.Chart) { return; }
-  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+function renderCharts() {
+  if (!window.Chart) return;
+  chartInstances.forEach(c => c.destroy());
+  chartInstances = [];
 
-  const canvas   = document.getElementById('chart-canvas');
-  if (!canvas) return;
-  const ctx      = canvas.getContext('2d');
-  const labels   = patient.sessioni.map((s, i) => `S${i + 1} — ${formatDate(s.data)}`);
-  const datasets = [];
+  const container = document.getElementById('progressi-charts');
+  if (!container) return;
+  container.innerHTML = '';
 
-  patient.attivita.filter(a => !a.archiviata).forEach((act, i) => {
-    const color  = CHART_COLORS[i % CHART_COLORS.length];
-    const hidden = i >= 5;
+  const acts = patient.attivita.filter(a => !a.archiviata);
+  if (!acts.length) {
+    container.innerHTML = `<p style="color:var(--text-2);text-align:center;padding:48px 0">${t('presenta.no-acts')}</p>`;
+    return;
+  }
+
+  acts.forEach((act, idx) => {
+    const color = CHART_COLORS[idx % CHART_COLORS.length];
+
+    // sessions since the activity was introduced
+    const addedIdx = act.addedInSession
+      ? Math.max(0, patient.sessioni.findIndex(s => s.id === act.addedInSession))
+      : 0;
+    const sessions = patient.sessioni.slice(addedIdx);
+
+    const labels = sessions.map((s, i) => {
+      const n = addedIdx + i + 1;
+      return `${t('sess.n', { n })}${t('sess.date-sep')}${formatDate(s.data)}`;
+    });
+
+    const datasets = [];
 
     datasets.push({
-      label:           act.desc || '(senza nome)',
-      isVissuto:       false,
-      isTarget:        false,
-      actIndex:        i,
-      data:            patient.sessioni.map(s => {
+      label:            t('chart.stimato'),
+      data:             sessions.map(s => {
         const p = s.punteggi.find(p => p.attivita_id === act.id);
         return p !== undefined ? p.stimato : null;
       }),
-      borderColor:     color,
-      backgroundColor: color + '18',
-      tension:         0.3,
-      pointRadius:     5,
+      borderColor:      color,
+      backgroundColor:  color + '22',
+      tension:          0.3,
+      pointRadius:      5,
       pointHoverRadius: 7,
-      borderWidth:     2,
-      hidden,
-      spanGaps:        false,
+      borderWidth:      2,
+      spanGaps:         false,
     });
 
     datasets.push({
-      label:           act.desc || '(senza nome)',
-      isVissuto:       true,
-      isTarget:        false,
-      actIndex:        i,
-      data:            patient.sessioni.map(s => {
+      label:            t('chart.vissuto'),
+      data:             sessions.map(s => {
         const p = s.punteggi.find(p => p.attivita_id === act.id);
         return (p && p.vissuto !== null) ? p.vissuto : null;
       }),
-      borderColor:     color,
-      backgroundColor: 'transparent',
-      borderDash:      [6, 4],
-      tension:         0.3,
-      pointRadius:     4,
+      borderColor:      color,
+      backgroundColor:  'transparent',
+      borderDash:       [6, 4],
+      tension:          0.3,
+      pointRadius:      4,
       pointHoverRadius: 6,
-      borderWidth:     1.5,
-      hidden,
-      spanGaps:        false,
+      borderWidth:      1.5,
+      spanGaps:         false,
     });
 
     if (act.target !== null && act.target !== undefined) {
       datasets.push({
-        label:           act.desc || '(senza nome)',
-        isVissuto:       false,
-        isTarget:        true,
-        actIndex:        i,
-        data:            patient.sessioni.map(() => act.target),
+        label:           t('chart.target'),
+        data:            sessions.map(() => act.target),
         borderColor:     color,
         backgroundColor: 'transparent',
         borderDash:      [2, 5],
         borderWidth:     1,
         pointRadius:     0,
-        hidden,
         spanGaps:        true,
       });
     }
-  });
 
-  chartInstance = new Chart(ctx, {
-    type: 'line',
-    data: { labels, datasets },
-    options: {
-      responsive:          true,
-      maintainAspectRatio: false,
-      interaction:         { mode: 'index', intersect: false },
-      scales: {
-        y: {
-          min: 0, max: 100,
-          title: { display: true, text: t('prog.y-axis'), color: '#5E7880', font: { size: 12 } },
-          grid:  { color: '#E4EEF1' },
-          ticks: { stepSize: 10, color: '#5E7880' },
-        },
-        x: {
-          grid:  { color: '#E4EEF1' },
-          ticks: { color: '#5E7880', maxRotation: 30 },
-        },
-      },
-      plugins: {
-        legend: {
-          labels: {
-            filter:        (item, data) => !data.datasets[item.datasetIndex].isVissuto && !data.datasets[item.datasetIndex].isTarget,
-            color:         '#253238',
-            usePointStyle: true,
-            padding:       16,
+    const canvasId = `chart-act-${act.id}`;
+    const card = document.createElement('div');
+    card.className = 'prog-chart-card';
+    card.innerHTML = `
+      <div class="prog-chart-title">${esc(act.desc) || t('act.no-name')}</div>
+      <div class="prog-chart-wrap"><canvas id="${canvasId}"></canvas></div>`;
+    container.appendChild(card);
+
+    const instance = new Chart(document.getElementById(canvasId).getContext('2d'), {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive:          true,
+        maintainAspectRatio: false,
+        interaction:         { mode: 'index', intersect: false },
+        scales: {
+          y: {
+            min: 0, max: 100,
+            grid:  { color: '#E4EEF1' },
+            ticks: { stepSize: 20, color: '#5E7880' },
           },
-          onClick: (e, legendItem, legend) => {
-            const chart    = legend.chart;
-            const actIndex = chart.data.datasets[legendItem.datasetIndex].actIndex;
-            const isHidden = chart.getDatasetMeta(legendItem.datasetIndex).hidden ?? false;
-            chart.data.datasets.forEach((ds, idx) => {
-              if (ds.actIndex === actIndex) chart.getDatasetMeta(idx).hidden = !isHidden;
-            });
-            chart.update();
+          x: {
+            grid:  { color: '#E4EEF1' },
+            ticks: { color: '#5E7880', maxRotation: 30 },
           },
         },
-        tooltip: {
-          callbacks: {
-            label: ctx => {
-              const val = ctx.parsed.y;
-              if (val === null || val === undefined) return null;
-              const type = ctx.dataset.isTarget ? t('chart.target') : ctx.dataset.isVissuto ? t('chart.vissuto') : t('chart.stimato');
-              return `  ${ctx.dataset.label} — ${type}: ${val}`;
+        plugins: {
+          legend: {
+            labels: {
+              color:         '#253238',
+              usePointStyle: true,
+              padding:       12,
+              font:          { size: 11 },
+            },
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                const val = ctx.parsed.y;
+                if (val === null || val === undefined) return null;
+                return `  ${ctx.dataset.label}: ${val}`;
+              },
             },
           },
         },
       },
-    },
+    });
+    chartInstances.push(instance);
   });
 }
 

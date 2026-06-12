@@ -98,7 +98,7 @@ function saveNotes() {
 function addActivity() {
   if (activeSession()?.locked) return;
   const actId = uidAct();
-  patient.attivita.push({ id: actId, desc: '', target: null, archiviata: false });
+  patient.attivita.push({ id: actId, desc: '', target: null, archiviata: false, addedInSession: currentSessionId });
   patient.sessioni.forEach(sess => {
     sess.punteggi.push({ attivita_id: actId, stimato: 0, vissuto: null, sel: false, noteVP: '' });
   });
@@ -138,7 +138,6 @@ function toggleShowArchived() {
 }
 
 function updateTarget(id, val) {
-  if (activeSession()?.locked) return;
   const a = patient.attivita.find(a => a.id === id);
   if (!a) return;
   a.target = (val === '' || val === null) ? null : Math.max(0, Math.min(100, parseInt(val) || 0));
@@ -444,10 +443,11 @@ function processImportedJSON(text) {
 
 function migrateV1toV2(data) {
   const attivita = (data.attivita || []).map(a => ({
-    id:         a.id   || uidAct(),
-    desc:       a.desc || a.descrizione || '',
-    target:     a.target ?? null,
-    archiviata: a.archiviata ?? false,
+    id:               a.id   || uidAct(),
+    desc:             a.desc || a.descrizione || '',
+    target:           a.target ?? null,
+    archiviata:       a.archiviata ?? false,
+    addedInSession:   a.addedInSession ?? null,
   }));
   const sessId = 'sess_' + uidAct();
   return {
