@@ -1,5 +1,43 @@
 'use strict';
 
+function openNewPatientModal() {
+  document.getElementById('in-nome').value    = '';
+  document.getElementById('in-cognome').value = '';
+  openModal('modal-new');
+  setTimeout(() => document.getElementById('in-nome').focus(), 50);
+}
+
+function createPatient() {
+  const nome    = document.getElementById('in-nome').value.trim();
+  const cognome = document.getElementById('in-cognome').value.trim();
+  if (!nome)    { document.getElementById('in-nome').focus();    return; }
+  if (!cognome) { document.getElementById('in-cognome').focus(); return; }
+
+  const sessId = 'sess_' + uidAct();
+  patient = {
+    v: 2,
+    id: uid4(),
+    nome,
+    cognome,
+    attivita: [],
+    sessioni: [{
+      id:             sessId,
+      data:           today(),
+      locked:         false,
+      notePrivate:    '',
+      titolo:         '',
+      noteVPGenerale: '',
+      punteggi:       [],
+    }],
+  };
+  currentSessionId = sessId;
+  fileHandle       = null;
+  closeModal('modal-new');
+  renderPatient();
+  showView('view-patient');
+  autoSave();
+}
+
 function switchSessionModal(id) {
   switchSession(id);
   renderSessionList();
