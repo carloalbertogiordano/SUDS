@@ -71,9 +71,6 @@ async function preparePDF() {
     const bar = document.getElementById('vp-result-bar');
     bar.style.display = 'flex';
     
-    const canShare = typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
-    document.getElementById('vp-share-btn').style.display = canShare ? '' : 'none';
-    
     // Show QR on screen
     renderQRToCanvas();
     
@@ -132,18 +129,36 @@ function toggleQRSize() {
   }
 }
 
-function shareViaWhatsApp() {
-  const url = getShareURL();
-  const text = `Ecco la scheda SUDS Voglio Provare per ${patient.nome}: ${url}`;
+function _linkWhatsApp() {
+  const url  = getShareURL();
+  const text = `Scheda SUDS Voglio Provare — ${patient.nome} ${patient.cognome}: ${url}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
 }
 
-function shareViaEmail() {
-  const url = getShareURL();
-  const subject = `Scheda SUDS Voglio Provare - ${patient.nome} ${patient.cognome}`;
-  const body = `Puoi visualizzare la scheda al seguente link:\n\n${url}`;
-  window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+function _linkTelegram() {
+  const url  = getShareURL();
+  const text = `Scheda SUDS Voglio Provare — ${patient.nome} ${patient.cognome}`;
+  window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
 }
+
+async function _shareFileOrFallback(fallback) {
+  if (!_pdfResult) {
+    const btn = document.getElementById('vp-genera-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Generazione…'; }
+    try { _pdfResult = await generatePDF(); } catch(e) { /* ignore */ }
+    if (btn) { btn.innerHTML = '&#8635; Rigenera'; btn.disabled = false; }
+    if (!_pdfResult) { fallback(); return; }
+  }
+  const file      = new File([_pdfResult.blob], _pdfResult.fname, { type: 'application/pdf' });
+  const shareData = { files: [file], title: 'SUDS - Scheda Paziente', text: `${patient.nome} ${patient.cognome}` };
+  if (navigator.canShare && navigator.canShare(shareData)) {
+    try { await navigator.share(shareData); return; } catch(e) { if (e.name === 'AbortError') return; }
+  }
+  fallback();
+}
+
+function shareViaWhatsApp()  { _shareFileOrFallback(_linkWhatsApp);  }
+function shareViaTelegram()  { _shareFileOrFallback(_linkTelegram);  }
 
 function downloadPDF() {
   if (!_pdfResult) return;
@@ -154,30 +169,6 @@ function downloadPDF() {
   a.click();
   URL.revokeObjectURL(url);
   toast('PDF salvato.');
-}
-
-async function sharePDF() {
-  if (!_pdfResult) return;
-  const file = new File([_pdfResult.blob], _pdfResult.fname, { type: 'application/pdf' });
-  
-  const shareData = {
-    title: 'SUDS - Scheda Paziente',
-    text: `Scheda Voglio Provare: ${patient.nome} ${patient.cognome}`,
-    files: [file]
-  };
-
-  try {
-    if (navigator.canShare && navigator.canShare(shareData)) {
-      await navigator.share(shareData);
-    } else {
-      toast('Condivisione non supportata su questo browser.', 'err');
-    }
-  } catch(e) {
-    if (e.name !== 'AbortError') {
-      console.error(e);
-      toast('Errore nella condivisione.', 'err');
-    }
-  }
 }
 
 async function generatePDF() {

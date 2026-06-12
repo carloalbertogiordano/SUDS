@@ -175,12 +175,10 @@
       <canvas id="qr-canvas-screen" style="width:60px; height:60px; cursor:zoom-in;" onclick="toggleQRSize()"></canvas>
     </div>
     <span class="vp-result-status">&#10003; PDF pronto</span>
-    <button class="btn btn-outline" id="vp-mail-btn" onclick="shareViaEmail()"
-            data-tooltip="Invia link via Email">&#9993; Email</button>
     <button class="btn btn-outline" id="vp-wa-btn" onclick="shareViaWhatsApp()"
-            data-tooltip="Invia link via WhatsApp">&#128172; WhatsApp</button>
-    <button class="btn btn-outline" id="vp-share-btn" onclick="sharePDF()" style="display:none"
-            data-tooltip="Condividi file PDF (Mobile)">&#128257; Condividi PDF</button>
+            data-tooltip="Condividi via WhatsApp (PDF su mobile, link su desktop)">&#128172; WhatsApp</button>
+    <button class="btn btn-outline" id="vp-tg-btn" onclick="shareViaTelegram()"
+            data-tooltip="Condividi via Telegram (PDF su mobile, link su desktop)">&#9992; Telegram</button>
     <button class="btn btn-primary" id="vp-download-btn" onclick="downloadPDF()"
             data-tooltip="Scarica il PDF sul dispositivo">&#8681; Scarica PDF</button>
   </div>

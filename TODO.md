@@ -19,4 +19,5 @@
 - [x] **Template gerarchia** — caricare lista attività predefinite come punto di partenza (es. "fobia sociale", "ansia da prestazione")
 - [x] **Export CSV** — esportare tutte le sessioni in CSV per analisi esterna (Excel, SPSS)
 - [x] **PWA installabile** — `manifest.json` + service worker + icone SVG; funziona offline per asset locali
+- [x] **Condivisione PDF diretta (no link)** — rimosso Email (mailto non supporta allegati); WhatsApp e Telegram auto-generano il PDF e usano `navigator.share({ files })` su mobile (picker OS nativo), fallback link su desktop. Da verificare comportamento su iOS/Android reali.
 - [ ] **Bottone "Problemi? Serve una mano?"** — home page, punta a `https://github.com/carloalbertogiordano/SUDS/issues/new`; aggiungere pagina/sezione nel repo con spiegazione su come aprire una issue (titolo descrittivo, cosa fare, cosa non fare)
