@@ -7,6 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#5B8E9F">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -63,6 +66,7 @@
       <button class="btn btn-outline btn-sm" id="btn-unlock" style="display:none" onclick="unlockSession()" data-tooltip="Sblocca la sessione per modificarla di nuovo">&#128275; Sblocca</button>
       <button class="btn btn-outline btn-sm" id="btn-delete-session" onclick="deleteCurrentSession()" data-tooltip="Elimina definitivamente questa sessione">&#128465; Elimina</button>
       <button class="btn btn-outline btn-sm" onclick="openNotesModal()" data-tooltip="Note private di sessione (non appaiono nel PDF)">&#128221; Note</button>
+      <button class="btn btn-outline btn-sm" onclick="openCompareModal()" data-tooltip="Confronto affiancato di due sessioni">&#9878; Confronta</button>
       <button class="btn btn-outline btn-sm" onclick="openProgressiView()" data-tooltip="Grafico andamento punteggi nel tempo">&#128200; Progressi</button>
       <button class="btn btn-outline btn-sm" onclick="openPresentazione()" data-tooltip="Modalità presentazione a schermo intero — tasto F">&#9974; Presenta <kbd>F</kbd></button>
       <button class="btn btn-outline btn-sm" onclick="exportCSV()" data-tooltip="Esporta tutti i dati delle sessioni in CSV">&#128196; CSV</button>
@@ -227,6 +231,22 @@
   </div>
 </div>
 
+<!-- ==================== MODAL: Confronto sessioni ==================== -->
+<div id="modal-compare" class="overlay">
+  <div class="modal modal-xl">
+    <div class="modal-title">&#9878; Confronto sessioni</div>
+    <div class="modal-sub">Seleziona due sessioni per confrontare i punteggi SUDS.</div>
+    <div class="compare-selectors">
+      <select id="compare-sess-a" class="sess-select" onchange="renderCompareTable()"></select>
+      <select id="compare-sess-b" class="sess-select" onchange="renderCompareTable()"></select>
+    </div>
+    <div id="compare-table-wrap"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-compare')">Chiudi</button>
+    </div>
+  </div>
+</div>
+
 <!-- ==================== MODAL: Template ==================== -->
 <div id="modal-templates" class="overlay">
   <div class="modal modal-xl">
@@ -244,6 +264,11 @@
 <div id="toast" class="toast"></div>
 
 <!-- Scripts -->
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+</script>
 <script src="js/state.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/ui.js"></script>

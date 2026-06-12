@@ -253,6 +253,86 @@ function updateArchivedToggle(count) {
   btn.style.display = count ? '' : 'none';
 }
 
+function openCompareModal() {
+  const opts = patient.sessioni.slice().reverse().map((s, i) => {
+    const n     = patient.sessioni.length - i;
+    const title = s.titolo ? ` · ${s.titolo}` : '';
+    return `<option value="${s.id}">Sessione ${n} — ${formatDate(s.data)}${title}</option>`;
+  }).join('');
+
+  const selA = document.getElementById('compare-sess-a');
+  const selB = document.getElementById('compare-sess-b');
+  if (selA) selA.innerHTML = opts;
+  if (selB) selB.innerHTML = opts;
+
+  const ids = patient.sessioni.map(s => s.id);
+  if (selA && ids.length >= 1) selA.value = ids[ids.length - 1];
+  if (selB && ids.length >= 2) selB.value = ids[ids.length - 2];
+  else if (selB && ids.length === 1) selB.value = ids[0];
+
+  renderCompareTable();
+  openModal('modal-compare');
+}
+
+function renderCompareTable() {
+  const wrap = document.getElementById('compare-table-wrap');
+  if (!wrap) return;
+
+  const idA  = document.getElementById('compare-sess-a')?.value;
+  const idB  = document.getElementById('compare-sess-b')?.value;
+  const sessA = patient.sessioni.find(s => s.id === idA);
+  const sessB = patient.sessioni.find(s => s.id === idB);
+  if (!sessA || !sessB) { wrap.innerHTML = ''; return; }
+
+  const nA = patient.sessioni.indexOf(sessA) + 1;
+  const nB = patient.sessioni.indexOf(sessB) + 1;
+
+  const acts = [...patient.attivita]
+    .filter(a => !a.archiviata)
+    .sort((a, b) => {
+      const pa = sessA.punteggi.find(p => p.attivita_id === a.id)?.stimato ?? 0;
+      const pb = sessA.punteggi.find(p => p.attivita_id === b.id)?.stimato ?? 0;
+      return pa - pb;
+    });
+
+  const hA = `Sess. ${nA}${sessA.titolo ? '<br><em>' + esc(sessA.titolo) + '</em>' : ''}<br><small>${formatDate(sessA.data)}</small>`;
+  const hB = `Sess. ${nB}${sessB.titolo ? '<br><em>' + esc(sessB.titolo) + '</em>' : ''}<br><small>${formatDate(sessB.data)}</small>`;
+
+  const rows = acts.map(a => {
+    const pA = sessA.punteggi.find(p => p.attivita_id === a.id);
+    const pB = sessB.punteggi.find(p => p.attivita_id === a.id);
+    const stA = pA?.stimato ?? null;
+    const stB = pB?.stimato ?? null;
+    const vsA = pA?.vissuto ?? null;
+    const vsB = pB?.vissuto ?? null;
+    const delta = stA !== null && stB !== null ? stB - stA : null;
+    const dCls  = delta === null ? '' : delta < 0 ? 'delta-better' : delta > 0 ? 'delta-worse' : 'delta-same';
+    const dStr  = delta === null ? '—' : (delta > 0 ? '+' : '') + delta;
+    const fmtScore = (st, vs) => st !== null
+      ? `${st}${vs !== null ? `<span class="compare-vissuto"> (${vs})</span>` : ''}`
+      : '—';
+    return `<tr>
+      <td>${esc(a.desc) || '(senza nome)'}</td>
+      <td class="compare-score">${fmtScore(stA, vsA)}</td>
+      <td class="compare-score">${fmtScore(stB, vsB)}</td>
+      <td class="compare-delta ${dCls}">${dStr}</td>
+    </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <table class="compare-table">
+      <thead><tr>
+        <th>Attività</th>
+        <th>${hA}</th>
+        <th>${hB}</th>
+        <th>Δ</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p class="compare-hint">Stimato &nbsp;·&nbsp; <span class="compare-vissuto">(vissuto)</span> &nbsp;·&nbsp;
+      <span class="delta-better">verde = miglioramento</span> nella direzione sessione A → B</p>`;
+}
+
 function openProgressiView() {
   const el = document.getElementById('progressi-patient-name');
   if (el) el.textContent = `${patient.nome} ${patient.cognome}`;

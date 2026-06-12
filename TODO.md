@@ -8,14 +8,15 @@
 
 ## Feature
 
-- [ ] **Indicator modifiche non salvate** — badge/asterisco nell'header dopo ogni modifica, sparisce dopo `saveJSON()`
-- [ ] **Titolo libero sessione** — campo opzionale per etichettare una sessione ("Dopo vacanze", "Prima EMDR"), mostrato nel selector e nel grafico
-- [ ] **Note VP persistenti** — le note inserite nella view "Voglio Provare" vengono salvate nella sessione e riproposte alla riapertura
-- [ ] **Target SUDS per attività** — terzo valore oltre stimato/vissuto: goal terapeutico. Visibile nel grafico progressi come linea tratteggiata orizzontale
-- [ ] **Archivio attività** — nascondere un'attività senza eliminarla, mantenendo lo storico nelle sessioni precedenti
-- [ ] **Hint tasti tastiera** — indicatore visibile dei tasti rapidi (`F` = presenta, `Esc` = chiudi). Es. tooltip o footer discreto
-- [ ] **Draft recovery con prompt** — al caricamento, se esiste draft in localStorage, chiedere "Ripristinare sessione di Mario Rossi del 10/06?" invece di caricare in silenzio
-- [ ] **Confronto sessioni** — vista tabellare affiancata di due sessioni selezionate (stimato + vissuto per ciascuna)
-- [ ] **Template gerarchia** — caricare lista attività predefinite come punto di partenza (es. "fobia sociale", "ansia da prestazione")
-- [ ] **Export CSV** — esportare tutte le sessioni in CSV per analisi esterna (Excel, SPSS)
-- [ ] **PWA installabile** — aggiungere `manifest.json` + service worker minimal per installazione da browser mobile
+- [x] **Indicator modifiche non salvate** — badge/asterisco nell'header dopo ogni modifica, sparisce dopo `saveJSON()`
+- [x] **Titolo libero sessione** — campo opzionale per etichettare una sessione ("Dopo vacanze", "Prima EMDR"), mostrato nel selector e nel grafico
+- [x] **Note VP persistenti** — le note inserite nella view "Voglio Provare" vengono salvate nella sessione e riproposte alla riapertura
+- [x] **Target SUDS per attività** — terzo valore oltre stimato/vissuto: goal terapeutico. Visibile nel grafico progressi come linea tratteggiata orizzontale
+- [x] **Archivio attività** — nascondere un'attività senza eliminarla, mantenendo lo storico nelle sessioni precedenti
+- [x] **Hint tasti tastiera** — indicatore visibile dei tasti rapidi (`F` = presenta, `Esc` = chiudi). Es. tooltip o footer discreto
+- [x] **Draft recovery con prompt** — al caricamento, se esiste draft in localStorage, chiedere "Ripristinare sessione di Mario Rossi del 10/06?" invece di caricare in silenzio
+- [x] **Confronto sessioni** — vista tabellare affiancata di due sessioni selezionate (stimato + vissuto per ciascuna)
+- [x] **Template gerarchia** — caricare lista attività predefinite come punto di partenza (es. "fobia sociale", "ansia da prestazione")
+- [x] **Export CSV** — esportare tutte le sessioni in CSV per analisi esterna (Excel, SPSS)
+- [x] **PWA installabile** — `manifest.json` + service worker + icone SVG; funziona offline per asset locali
+- [ ] **Bottone "Problemi? Serve una mano?"** — home page, punta a `https://github.com/carloalbertogiordano/SUDS/issues/new`; aggiungere pagina/sezione nel repo con spiegazione su come aprire una issue (titolo descrittivo, cosa fare, cosa non fare)

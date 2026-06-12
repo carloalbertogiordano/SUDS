@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="32" fill="#5B8E9F"/>
+  <text x="96" y="72" font-family="Georgia,serif" font-size="52" font-weight="700"
+        fill="white" text-anchor="middle" dominant-baseline="middle">S</text>
+  <text x="96" y="130" font-family="Georgia,serif" font-size="22" font-weight="400"
+        fill="rgba(255,255,255,0.85)" text-anchor="middle" dominant-baseline="middle">SUDS</text>
+</svg>

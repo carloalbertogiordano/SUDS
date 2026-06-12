@@ -1,0 +1,190 @@
+{
+  "v": 2,
+  "id": "4271",
+  "nome": "Mario",
+  "cognome": "Rossi",
+  "attivita": [
+    { "id": "act001", "desc": "Salutare un vicino di casa", "target": 10, "archiviata": false },
+    { "id": "act002", "desc": "Telefonare a un negozio per chiedere informazioni", "target": 15, "archiviata": false },
+    { "id": "act003", "desc": "Fare una domanda in riunione di lavoro", "target": 20, "archiviata": false },
+    { "id": "act004", "desc": "Mangiare al ristorante con un collega", "target": 20, "archiviata": false },
+    { "id": "act005", "desc": "Partecipare a una riunione con persone non conosciute", "target": 30, "archiviata": false },
+    { "id": "act006", "desc": "Presentarsi a una festa e fare conversazione", "target": 30, "archiviata": false },
+    { "id": "act007", "desc": "Esprimere disaccordo con un superiore", "target": 35, "archiviata": false },
+    { "id": "act008", "desc": "Fare una presentazione davanti al team (10 persone)", "target": 40, "archiviata": false },
+    { "id": "act009", "desc": "Tenere un discorso a un evento formale (30+ persone)", "target": 50, "archiviata": false }
+  ],
+  "sessioni": [
+    {
+      "id": "sess001",
+      "data": "2024-09-05",
+      "locked": true,
+      "titolo": "Assessment iniziale",
+      "notePrivate": "Mario si presenta con forte evitamento sociale da circa 2 anni. Evento scatenante: critica pubblica da parte del responsabile in una riunione aziendale. Motivazione al cambiamento alta.",
+      "noteVPGenerale": "Prima raccolta della gerarchia. Punteggi riflettono il livello di ansia attuale senza esposizione.",
+      "punteggi": [
+        { "attivita_id": "act001", "stimato": 20, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act002", "stimato": 35, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act003", "stimato": 70, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act004", "stimato": 45, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act005", "stimato": 80, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act006", "stimato": 75, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act007", "stimato": 85, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act008", "stimato": 90, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act009", "stimato": 95, "vissuto": null, "sel": false, "noteVP": "" }
+      ]
+    },
+    {
+      "id": "sess002",
+      "data": "2024-09-19",
+      "locked": true,
+      "titolo": "Psicoeducazione + esposizione in immaginazione",
+      "notePrivate": "Spiegato modello cognitivo-comportamentale dell'ansia sociale. Mario inizia a riconoscere i pensieri automatici negativi. Esposizione in immaginazione su saluto al vicino.",
+      "noteVPGenerale": "Compito: salutare almeno 3 vicini durante la settimana.",
+      "punteggi": [
+        { "attivita_id": "act001", "stimato": 20, "vissuto": 18, "sel": true, "noteVP": "Ha salutato 2 vicini. Riferisce lieve tensione ma nessun evitamento. Bene." },
+        { "attivita_id": "act002", "stimato": 35, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act003", "stimato": 70, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act004", "stimato": 45, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act005", "stimato": 80, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act006", "stimato": 75, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act007", "stimato": 85, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act008", "stimato": 90, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act009", "stimato": 95, "vissuto": null, "sel": false, "noteVP": "" }
+      ]
+    },
+    {
+      "id": "sess003",
+      "data": "2024-10-03",
+      "locked": true,
+      "titolo": "Prime esposizioni in vivo",
+      "notePrivate": "Buon feedback sull'homework. Ha anche tentato una telefonata al dentista — non pianificata! Lavorato su ristrutturazione cognitiva dei pensieri legati al giudizio altrui.",
+      "noteVPGenerale": "Aggiungiamo la telefonata. Obiettivo: almeno 2 chiamate a negozi/servizi.",
+      "punteggi": [
+        { "attivita_id": "act001", "stimato": 15, "vissuto": 12, "sel": true, "noteVP": "Ora quasi automatico. Dice 'non ci penso più prima di farlo'." },
+        { "attivita_id": "act002", "stimato": 30, "vissuto": 28, "sel": true, "noteVP": "Ha chiamato il dentista e un negozio di scarpe. SUDS vissuto inferiore alle aspettative." },
+        { "attivita_id": "act003", "stimato": 65, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act004", "stimato": 40, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act005", "stimato": 75, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act006", "stimato": 70, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act007", "stimato": 80, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act008", "stimato": 88, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act009", "stimato": 92, "vissuto": null, "sel": false, "noteVP": "" }
+      ]
+    },
+    {
+      "id": "sess004",
+      "data": "2024-10-17",
+      "locked": true,
+      "titolo": "Ristrutturazione cognitiva",
+      "notePrivate": "Settimana difficile — Mario ha evitato un pranzo aziendale. Non un fallimento: occasione per analizzare i pensieri anticipatori. Lavorato sul 'worst case scenario' e sull'evidenza reale.",
+      "noteVPGenerale": "Sessione più cognitiva questa settimana. Compito: pranzare con almeno un collega.",
+      "punteggi": [
+        { "attivita_id": "act001", "stimato": 12, "vissuto": 10, "sel": false, "noteVP": "" },
+        { "attivita_id": "act002", "stimato": 25, "vissuto": 22, "sel": false, "noteVP": "" },
+        { "attivita_id": "act003", "stimato": 65, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act004", "stimato": 38, "vissuto": 42, "sel": true, "noteVP": "Ha pranzato con un collega. SUDS vissuto leggermente superiore: era preoccupato di 'avere cose da dire'. Da lavorare." },
+        { "attivita_id": "act005", "stimato": 72, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act006", "stimato": 68, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act007", "stimato": 78, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act008", "stimato": 85, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act009", "stimato": 90, "vissuto": null, "sel": false, "noteVP": "" }
+      ]
+    },
+    {
+      "id": "sess005",
+      "data": "2024-11-07",
+      "locked": true,
+      "titolo": "Breve regressione — rianalisi",
+      "notePrivate": "Mario ha vissuto una critica del capo in una breve riunione informale. SUDS schizzato. Ha evitato per 3 giorni. Normalizzato come parte del percorso. Ripristinato piano di esposizione. Resilienza buona: è tornato in seduta invece di interrompere la terapia.",
+      "noteVPGenerale": "Momento di regressione fisiologico. Riprendiamo dall'esposizione in ufficio, passo più graduale.",
+      "punteggi": [
+        { "attivita_id": "act001", "stimato": 12, "vissuto": 10, "sel": false, "noteVP": "" },
+        { "attivita_id": "act002", "stimato": 22, "vissuto": 20, "sel": false, "noteVP": "" },
+        { "attivita_id": "act003", "stimato": 72, "vissuto": 75, "sel": true, "noteVP": "Ha fatto una domanda in riunione — coraggio dopo la settimana difficile. SUDS più alto del previsto per via della regressione." },
+        { "attivita_id": "act004", "stimato": 35, "vissuto": 30, "sel": true, "noteVP": "Pranzo con 2 colleghi. Nettamente migliorato rispetto alla sessione 4." },
+        { "attivita_id": "act005", "stimato": 70, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act006", "stimato": 65, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act007", "stimato": 78, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act008", "stimato": 82, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act009", "stimato": 88, "vissuto": null, "sel": false, "noteVP": "" }
+      ]
+    },
+    {
+      "id": "sess006",
+      "data": "2024-11-21",
+      "locked": true,
+      "titolo": "Accelerazione dei progressi",
+      "notePrivate": "Svolta: Mario ha partecipato a una riunione con esterni e ha contribuito attivamente. Riferisce 'mi sono sentito quasi normale'. Autoefficacia in netta crescita.",
+      "noteVPGenerale": "Ottima sessione. Espandiamo al contesto sociale fuori dall'ufficio.",
+      "punteggi": [
+        { "attivita_id": "act001", "stimato": 10, "vissuto": 8, "sel": false, "noteVP": "" },
+        { "attivita_id": "act002", "stimato": 18, "vissuto": 15, "sel": false, "noteVP": "" },
+        { "attivita_id": "act003", "stimato": 50, "vissuto": 45, "sel": true, "noteVP": "Miglioramento stabile rispetto alla regressione del mese scorso." },
+        { "attivita_id": "act004", "stimato": 25, "vissuto": 20, "sel": false, "noteVP": "" },
+        { "attivita_id": "act005", "stimato": 58, "vissuto": 55, "sel": true, "noteVP": "Riunione con esterni: ha parlato due volte. SUDS vissuto inferiore allo stimato." },
+        { "attivita_id": "act006", "stimato": 55, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act007", "stimato": 65, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act008", "stimato": 72, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act009", "stimato": 82, "vissuto": null, "sel": false, "noteVP": "" }
+      ]
+    },
+    {
+      "id": "sess007",
+      "data": "2024-12-05",
+      "locked": true,
+      "titolo": "Contesti sociali informali",
+      "notePrivate": "Mario ha partecipato a una cena di Natale aziendale — evento che l'anno scorso aveva evitato. Ha descritto serata 'piacevole con qualche momento di tensione'. Lavoriamo su mantenimento.",
+      "noteVPGenerale": "Evento sociale reale: cena aziendale. Grande passo.",
+      "punteggi": [
+        { "attivita_id": "act001", "stimato": 8, "vissuto": 5, "sel": false, "noteVP": "" },
+        { "attivita_id": "act002", "stimato": 15, "vissuto": 12, "sel": false, "noteVP": "" },
+        { "attivita_id": "act003", "stimato": 35, "vissuto": 30, "sel": false, "noteVP": "" },
+        { "attivita_id": "act004", "stimato": 20, "vissuto": 15, "sel": false, "noteVP": "" },
+        { "attivita_id": "act005", "stimato": 45, "vissuto": 40, "sel": false, "noteVP": "" },
+        { "attivita_id": "act006", "stimato": 48, "vissuto": 42, "sel": true, "noteVP": "Cena aziendale: è rimasto 2 ore, ha parlato con persone nuove. Mese scorso sarebbe fuggito dopo 20 minuti." },
+        { "attivita_id": "act007", "stimato": 55, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act008", "stimato": 62, "vissuto": null, "sel": false, "noteVP": "" },
+        { "attivita_id": "act009", "stimato": 75, "vissuto": null, "sel": false, "noteVP": "" }
+      ]
+    },
+    {
+      "id": "sess008",
+      "data": "2025-01-16",
+      "locked": true,
+      "titolo": "Consolidamento — obiettivi lavorativi",
+      "notePrivate": "Pausa natalizia positiva. Mario ha incontrato amici per la prima volta in mesi. Lavoriamo sulla sfida più alta: presentazione al team. Esposizione in immaginazione guidata in seduta.",
+      "noteVPGenerale": "Focus su presentazione. Compito: preparare 5 slide su un progetto reale e presentarle al team.",
+      "punteggi": [
+        { "attivita_id": "act001", "stimato": 6, "vissuto": 5, "sel": false, "noteVP": "" },
+        { "attivita_id": "act002", "stimato": 12, "vissuto": 10, "sel": false, "noteVP": "" },
+        { "attivita_id": "act003", "stimato": 25, "vissuto": 22, "sel": false, "noteVP": "" },
+        { "attivita_id": "act004", "stimato": 15, "vissuto": 12, "sel": false, "noteVP": "" },
+        { "attivita_id": "act005", "stimato": 35, "vissuto": 30, "sel": false, "noteVP": "" },
+        { "attivita_id": "act006", "stimato": 38, "vissuto": 32, "sel": false, "noteVP": "" },
+        { "attivita_id": "act007", "stimato": 42, "vissuto": 38, "sel": true, "noteVP": "Ha espresso una posizione divergente in call con il responsabile. Nessuna catastrofe. Punto di svolta cognitivo." },
+        { "attivita_id": "act008", "stimato": 55, "vissuto": 60, "sel": true, "noteVP": "Presentazione al team: alta ansia anticipatoria (SUDS vissuto > stimato). Ha comunque portato a termine. Ottimo." },
+        { "attivita_id": "act009", "stimato": 70, "vissuto": null, "sel": false, "noteVP": "" }
+      ]
+    },
+    {
+      "id": "sess009",
+      "data": "2025-02-06",
+      "locked": false,
+      "titolo": "Sessione di follow-up",
+      "notePrivate": "Mario riferisce cambiamento stabile. Punteggi SUDS ai minimi storici. Valutare riduzione frequenza a una seduta al mese per consolidamento.",
+      "noteVPGenerale": "Sessione di verifica finale. Tutti gli obiettivi terapeutici raggiunti o in linea con il target.",
+      "punteggi": [
+        { "attivita_id": "act001", "stimato": 5, "vissuto": 4, "sel": false, "noteVP": "" },
+        { "attivita_id": "act002", "stimato": 10, "vissuto": 8, "sel": false, "noteVP": "" },
+        { "attivita_id": "act003", "stimato": 18, "vissuto": 15, "sel": false, "noteVP": "" },
+        { "attivita_id": "act004", "stimato": 12, "vissuto": 10, "sel": false, "noteVP": "" },
+        { "attivita_id": "act005", "stimato": 28, "vissuto": 25, "sel": false, "noteVP": "" },
+        { "attivita_id": "act006", "stimato": 30, "vissuto": 28, "sel": false, "noteVP": "" },
+        { "attivita_id": "act007", "stimato": 32, "vissuto": 28, "sel": false, "noteVP": "" },
+        { "attivita_id": "act008", "stimato": 42, "vissuto": 38, "sel": true, "noteVP": "Seconda presentazione al team: SUDS vissuto nettamente inferiore rispetto alla prima. Autoefficacia consolidata." },
+        { "attivita_id": "act009", "stimato": 55, "vissuto": 50, "sel": true, "noteVP": "Ha tenuto un intervento breve a un evento di settore. 6 mesi fa era impensabile." }
+      ]
+    }
+  ]
+}

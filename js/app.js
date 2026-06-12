@@ -537,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    ['modal-new', 'modal-sessions', 'modal-notes', 'modal-templates'].forEach(id => closeModal(id));
+    ['modal-new', 'modal-sessions', 'modal-notes', 'modal-templates', 'modal-compare'].forEach(id => closeModal(id));
     closePresentazione();
     closeVPView();
     closeProgressiView();

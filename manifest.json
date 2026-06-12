@@ -1,0 +1,24 @@
+{
+  "name": "SUDS — Scala di Disagio Soggettivo",
+  "short_name": "SUDS",
+  "description": "Gestione gerarchie di esposizione graduata per psicologi clinici",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#EEF2F1",
+  "theme_color": "#5B8E9F",
+  "lang": "it",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
